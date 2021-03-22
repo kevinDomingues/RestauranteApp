@@ -17,6 +17,7 @@ public class RestauranteApp {
     public static void main(String[] args) {
         // TODO code application logic here
         System.out.println("Login");
+        System.out.println("Teste2");
     }
     
 }
