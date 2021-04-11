@@ -18,6 +18,9 @@ public class RestauranteApp {
         // TODO code application logic here
         System.out.println("Login");
         System.out.println("Teste2");
+        
+        Login login = new Login();
+        login.setVisible(true);
     }
     
 }
