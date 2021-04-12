@@ -2,9 +2,18 @@
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
   <persistence-unit name="RestauranteAppPU" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-    <class>RestauranteApp.DAL.Entidade</class>
-    <class>RestauranteApp.DAL.Pedido</class>
-    <class>RestauranteApp.DAL.Reserva</class>
+		<class>RestauranteApp.DAL.Produto</class>
+		<class>RestauranteApp.DAL.StockProduto</class>
+		<class>RestauranteApp.DAL.CodPostais</class>
+		<class>RestauranteApp.DAL.Mesas</class>
+		<class>RestauranteApp.DAL.Entidade</class>
+		<class>RestauranteApp.DAL.Pedido</class>
+		<class>RestauranteApp.DAL.LinhaPedido</class>
+		<class>RestauranteApp.DAL.Reserva</class>
+		<class>RestauranteApp.DAL.ReservaMesa</class>
+		<class>RestauranteApp.DAL.Fornecedor</class>
+		<class>RestauranteApp.DAL.Encomenda</class>
+		<class>RestauranteApp.DAL.LinhaEncomenda</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@localhost:1521:XE"/>
       <property name="javax.persistence.jdbc.user" value="restaurante"/>

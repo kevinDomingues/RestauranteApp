@@ -5,6 +5,9 @@
  */
 package restauranteapp;
 
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 /**
  *
  * @author kevin
@@ -14,8 +17,10 @@ public class RestauranteApp {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnsupportedLookAndFeelException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         // TODO code application logic here
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        
         System.out.println("Login");
         System.out.println("Teste2");
         

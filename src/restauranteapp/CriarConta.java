@@ -16,6 +16,7 @@ public class CriarConta extends javax.swing.JFrame {
      */
     public CriarConta() {
         initComponents();
+        this.setLocationRelativeTo(null);
     }
 
     /**
