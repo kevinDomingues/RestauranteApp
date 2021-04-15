@@ -11,55 +11,89 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 /**
  *
  * @author kevin
  */
-
-
 @Entity
-@Table(name= "entidade")
+@Table(name = "ENTIDADE")
+@NamedQueries({
+    @NamedQuery(name = "Entidade.findAll", query = "SELECT e FROM Entidade e"),
+    @NamedQuery(name = "Entidade.findByIdEntidade", query = "SELECT e FROM Entidade e WHERE e.idEntidade = :idEntidade"),
+    @NamedQuery(name = "Entidade.findByNome", query = "SELECT e FROM Entidade e WHERE e.nome = :nome"),
+    @NamedQuery(name = "Entidade.findByNif", query = "SELECT e FROM Entidade e WHERE e.nif = :nif"),
+    @NamedQuery(name = "Entidade.findByRua", query = "SELECT e FROM Entidade e WHERE e.rua = :rua"),
+    @NamedQuery(name = "Entidade.findByNporta", query = "SELECT e FROM Entidade e WHERE e.nporta = :nporta"),
+    @NamedQuery(name = "Entidade.findByEmail", query = "SELECT e FROM Entidade e WHERE e.email = :email"),
+    @NamedQuery(name = "Entidade.findByTelefone", query = "SELECT e FROM Entidade e WHERE e.telefone = :telefone"),
+    @NamedQuery(name = "Entidade.findByPasswordp", query = "SELECT e FROM Entidade e WHERE e.passwordp = :passwordp"),
+    @NamedQuery(name = "Entidade.findByNivelpermissao", query = "SELECT e FROM Entidade e WHERE e.nivelpermissao = :nivelpermissao")})
 public class Entidade implements Serializable {
-    
-    @Id
-    @GeneratedValue(strategy=GenerationType.SEQUENCE)
-    @Column(name = "id_entidade")
-    private Integer id_entidade;
-    @Column(name = "nome")
-    private String nome;
-    @Column(name = "nif")
-    private Integer NIF;
-    @Column(name = "rua")
-    private String rua;
-    @Column(name = "nporta")
-    private Integer nPorta;
-    @Column(name = "codpostal")
-    private String cod_postal;
-    @Column(name = "telefone")
-    private Integer Telefone;
-    @Column(name = "passwordp")
-    private String password;
-    @Column(name = "nivelpermissao")
-    private Integer nivelPermissao;
 
-    
-    
-    
-    public Integer getId_entidade() {
-        return id_entidade;
+    private static final long serialVersionUID = 1L;
+    @Id
+    @Basic(optional = false)
+    @Column(name = "ID_ENTIDADE")
+    private Integer idEntidade;
+    @Basic(optional = false)
+    @Column(name = "NOME")
+    private String nome;
+    @Basic(optional = false)
+    @Column(name = "NIF")
+    private int nif;
+    @Basic(optional = false)
+    @Column(name = "RUA")
+    private String rua;
+    @Basic(optional = false)
+    @Column(name = "NPORTA")
+    private int nporta;
+    @Column(name = "EMAIL")
+    private String email;
+    @Column(name = "TELEFONE")
+    private Integer telefone;
+    @Column(name = "PASSWORDP")
+    private String passwordp;
+    @Basic(optional = false)
+    @Column(name = "NIVELPERMISSAO")
+    private int nivelpermissao;
+    @JoinColumn(name = "CODPOSTAL", referencedColumnName = "CODPOSTAL")
+    @ManyToOne(optional = false)
+    private Codpostais codpostal;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idEntidade")
+    private List<Pedido> pedidoList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idEntidade")
+    private List<Reserva> reservaList;
+
+    public Entidade() {
     }
 
-    public void setId_entidade(Integer id_entidade) {
-        this.id_entidade = id_entidade;
+    public Entidade(Integer idEntidade) {
+        this.idEntidade = idEntidade;
+    }
+
+    public Entidade(Integer idEntidade, String nome, int nif, String rua, int nporta, int nivelpermissao) {
+        this.idEntidade = idEntidade;
+        this.nome = nome;
+        this.nif = nif;
+        this.rua = rua;
+        this.nporta = nporta;
+        this.nivelpermissao = nivelpermissao;
+    }
+
+    public Integer getIdEntidade() {
+        return idEntidade;
+    }
+
+    public void setIdEntidade(Integer idEntidade) {
+        this.idEntidade = idEntidade;
     }
 
     public String getNome() {
@@ -70,12 +104,12 @@ public class Entidade implements Serializable {
         this.nome = nome;
     }
 
-    public Integer getNIF() {
-        return NIF;
+    public int getNif() {
+        return nif;
     }
 
-    public void setNIF(Integer NIF) {
-        this.NIF = NIF;
+    public void setNif(int nif) {
+        this.nif = nif;
     }
 
     public String getRua() {
@@ -86,50 +120,74 @@ public class Entidade implements Serializable {
         this.rua = rua;
     }
 
-    public Integer getnPorta() {
-        return nPorta;
+    public int getNporta() {
+        return nporta;
     }
 
-    public void setnPorta(Integer nPorta) {
-        this.nPorta = nPorta;
+    public void setNporta(int nporta) {
+        this.nporta = nporta;
     }
 
-    public String getCod_postal() {
-        return cod_postal;
+    public String getEmail() {
+        return email;
     }
 
-    public void setCod_postal(String cod_postal) {
-        this.cod_postal = cod_postal;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Integer getTelefone() {
-        return Telefone;
+        return telefone;
     }
 
-    public void setTelefone(Integer Telefone) {
-        this.Telefone = Telefone;
+    public void setTelefone(Integer telefone) {
+        this.telefone = telefone;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPasswordp() {
+        return passwordp;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPasswordp(String passwordp) {
+        this.passwordp = passwordp;
     }
 
-    public Integer getNivelPermissao() {
-        return nivelPermissao;
+    public int getNivelpermissao() {
+        return nivelpermissao;
     }
 
-    public void setNivelPermissao(Integer nivelPermissao) {
-        this.nivelPermissao = nivelPermissao;
+    public void setNivelpermissao(int nivelpermissao) {
+        this.nivelpermissao = nivelpermissao;
     }
-    
+
+    public Codpostais getCodpostal() {
+        return codpostal;
+    }
+
+    public void setCodpostal(Codpostais codpostal) {
+        this.codpostal = codpostal;
+    }
+
+    public List<Pedido> getPedidoList() {
+        return pedidoList;
+    }
+
+    public void setPedidoList(List<Pedido> pedidoList) {
+        this.pedidoList = pedidoList;
+    }
+
+    public List<Reserva> getReservaList() {
+        return reservaList;
+    }
+
+    public void setReservaList(List<Reserva> reservaList) {
+        this.reservaList = reservaList;
+    }
+
     @Override
     public int hashCode() {
-        Integer hash = 0;
-        hash += (id_entidade != null ? id_entidade.hashCode() : 0);
+        int hash = 0;
+        hash += (idEntidade != null ? idEntidade.hashCode() : 0);
         return hash;
     }
 
@@ -140,7 +198,7 @@ public class Entidade implements Serializable {
             return false;
         }
         Entidade other = (Entidade) object;
-        if ((this.id_entidade == null && other.id_entidade != null) || (this.id_entidade != null && !this.id_entidade.equals(other.id_entidade))) {
+        if ((this.idEntidade == null && other.idEntidade != null) || (this.idEntidade != null && !this.idEntidade.equals(other.idEntidade))) {
             return false;
         }
         return true;
@@ -148,10 +206,7 @@ public class Entidade implements Serializable {
 
     @Override
     public String toString() {
-        return "restauranteapp.DAL.Entidade[ id_entidade=" + id_entidade + " ]";
+        return "restauranteapp.DAL.Entidade[ idEntidade=" + idEntidade + " ]";
     }
-    
-    
-    
     
 }

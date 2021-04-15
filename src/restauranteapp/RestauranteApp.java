@@ -22,8 +22,8 @@ public class RestauranteApp {
      * @param args the command line arguments
      */
     
-    private static EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("RestauranteAppPU");
-    private static EntityManager em = entityManagerFactory.createEntityManager();
+    private static final EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("RestauranteAppPU");
+    private static final EntityManager em = entityManagerFactory.createEntityManager();
     
     public static void main(String[] args) throws UnsupportedLookAndFeelException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         // TODO code application logic here
