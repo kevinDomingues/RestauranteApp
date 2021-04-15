@@ -26,26 +26,39 @@ import javax.persistence.Table;
  */
 
 
-
-public class Entidade {
-    private int id_entidade;
+@Entity
+@Table(name= "entidade")
+public class Entidade implements Serializable {
+    
+    @Id
+    @GeneratedValue(strategy=GenerationType.SEQUENCE)
+    @Column(name = "id_entidade")
+    private Integer id_entidade;
+    @Column(name = "nome")
     private String nome;
-    private int NIF;
+    @Column(name = "nif")
+    private Integer NIF;
+    @Column(name = "rua")
     private String rua;
-    private int nPorta;
+    @Column(name = "nporta")
+    private Integer nPorta;
+    @Column(name = "codpostal")
     private String cod_postal;
-    private int Telefone;
+    @Column(name = "telefone")
+    private Integer Telefone;
+    @Column(name = "passwordp")
     private String password;
-    private int nivelPermissao;
+    @Column(name = "nivelpermissao")
+    private Integer nivelPermissao;
 
     
     
     
-    public int getId_entidade() {
+    public Integer getId_entidade() {
         return id_entidade;
     }
 
-    public void setId_entidade(int id_entidade) {
+    public void setId_entidade(Integer id_entidade) {
         this.id_entidade = id_entidade;
     }
 
@@ -57,11 +70,11 @@ public class Entidade {
         this.nome = nome;
     }
 
-    public int getNIF() {
+    public Integer getNIF() {
         return NIF;
     }
 
-    public void setNIF(int NIF) {
+    public void setNIF(Integer NIF) {
         this.NIF = NIF;
     }
 
@@ -73,11 +86,11 @@ public class Entidade {
         this.rua = rua;
     }
 
-    public int getnPorta() {
+    public Integer getnPorta() {
         return nPorta;
     }
 
-    public void setnPorta(int nPorta) {
+    public void setnPorta(Integer nPorta) {
         this.nPorta = nPorta;
     }
 
@@ -89,11 +102,11 @@ public class Entidade {
         this.cod_postal = cod_postal;
     }
 
-    public int getTelefone() {
+    public Integer getTelefone() {
         return Telefone;
     }
 
-    public void setTelefone(int Telefone) {
+    public void setTelefone(Integer Telefone) {
         this.Telefone = Telefone;
     }
 
@@ -105,15 +118,38 @@ public class Entidade {
         this.password = password;
     }
 
-    public int getNivelPermissao() {
+    public Integer getNivelPermissao() {
         return nivelPermissao;
     }
 
-    public void setNivelPermissao(int nivelPermissao) {
+    public void setNivelPermissao(Integer nivelPermissao) {
         this.nivelPermissao = nivelPermissao;
     }
     
-    
+    @Override
+    public int hashCode() {
+        Integer hash = 0;
+        hash += (id_entidade != null ? id_entidade.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof Entidade)) {
+            return false;
+        }
+        Entidade other = (Entidade) object;
+        if ((this.id_entidade == null && other.id_entidade != null) || (this.id_entidade != null && !this.id_entidade.equals(other.id_entidade))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "restauranteapp.DAL.Entidade[ id_entidade=" + id_entidade + " ]";
+    }
     
     
     
