@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package restauranteapp;
+package GUI;
 
 /**
  *
@@ -28,6 +28,7 @@ public class Menu extends javax.swing.JFrame {
         this.verPedidos.setVisible(false);
         this.verProdutos.setVisible(false);
         this.verEncomendas.setVisible(false);
+        this.mesas.setVisible(false);
     }
     
     public void SwitchPanel(int panelNumber) {
@@ -37,6 +38,7 @@ public class Menu extends javax.swing.JFrame {
             case 2: this.verPedidos.setVisible(true);
             case 3: this.verProdutos.setVisible(true);
             case 4: this.verEncomendas.setVisible(true);
+            case 5: this.mesas.setVisible(true);
         }
     }
     
@@ -98,7 +100,7 @@ public class Menu extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         verEncomendas = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
-        mesax = new javax.swing.JPanel();
+        mesas = new javax.swing.JPanel();
         jPanel23 = new javax.swing.JPanel();
         jPanel24 = new javax.swing.JPanel();
         jPanel25 = new javax.swing.JPanel();
@@ -658,18 +660,18 @@ public class Menu extends javax.swing.JFrame {
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
         );
 
-        javax.swing.GroupLayout mesaxLayout = new javax.swing.GroupLayout(mesax);
-        mesax.setLayout(mesaxLayout);
-        mesaxLayout.setHorizontalGroup(
-            mesaxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mesaxLayout.createSequentialGroup()
+        javax.swing.GroupLayout mesasLayout = new javax.swing.GroupLayout(mesas);
+        mesas.setLayout(mesasLayout);
+        mesasLayout.setHorizontalGroup(
+            mesasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(mesasLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel23, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
-        mesaxLayout.setVerticalGroup(
-            mesaxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mesaxLayout.createSequentialGroup()
+        mesasLayout.setVerticalGroup(
+            mesasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(mesasLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel23, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -679,7 +681,7 @@ public class Menu extends javax.swing.JFrame {
         jLayeredPane1.setLayer(verMesas, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane1.setLayer(verPedidos, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane1.setLayer(verEncomendas, javax.swing.JLayeredPane.DEFAULT_LAYER);
-        jLayeredPane1.setLayer(mesax, javax.swing.JLayeredPane.DEFAULT_LAYER);
+        jLayeredPane1.setLayer(mesas, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         javax.swing.GroupLayout jLayeredPane1Layout = new javax.swing.GroupLayout(jLayeredPane1);
         jLayeredPane1.setLayout(jLayeredPane1Layout);
@@ -698,7 +700,7 @@ public class Menu extends javax.swing.JFrame {
             .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jLayeredPane1Layout.createSequentialGroup()
                     .addContainerGap()
-                    .addComponent(mesax, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(mesas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addContainerGap()))
         );
         jLayeredPane1Layout.setVerticalGroup(
@@ -716,7 +718,7 @@ public class Menu extends javax.swing.JFrame {
             .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jLayeredPane1Layout.createSequentialGroup()
                     .addGap(11, 11, 11)
-                    .addComponent(mesax, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(mesas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGap(11, 11, 11)))
         );
 
@@ -863,7 +865,7 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextPane jTextPane1;
-    private javax.swing.JPanel mesax;
+    private javax.swing.JPanel mesas;
     private javax.swing.JPanel verEncomendas;
     private javax.swing.JPanel verMesas;
     private javax.swing.JPanel verPedidos;

@@ -3,7 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package restauranteapp;
+package GUI;
+
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
+import javax.persistence.EntityManagerFactory;
+import restauranteapp.BLL.EntidadeJpaController;
+import restauranteapp.DAL.Entidade;
+
 
 /**
  *
@@ -17,6 +25,22 @@ public class Login extends javax.swing.JFrame {
     public Login() {
         initComponents();
         this.setLocationRelativeTo(null);
+    }
+    
+    public boolean validateLogin(String username, String password){
+        EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("RestauranteAppPU");
+        EntidadeJpaController ec = new EntidadeJpaController(entityManagerFactory);
+        
+        List<Entidade> users = ec.findEntidadeEntities();
+        boolean loginStatus = false;
+        
+        for(Entidade e : users){
+            if(e.getUsername().equals(username) && e.getPasswordp().equals(password)){
+                loginStatus = true;
+                System.out.println("oi");
+            }
+        }
+        return loginStatus;
     }
 
     /**
@@ -32,8 +56,8 @@ public class Login extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
-        jPasswordField1 = new javax.swing.JPasswordField();
+        jUsernameField = new javax.swing.JTextField();
+        jPasswordField = new javax.swing.JPasswordField();
         LoginButton = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
 
@@ -70,18 +94,18 @@ public class Login extends javax.swing.JFrame {
             }
         });
 
-        jTextField2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jTextField2.setForeground(new java.awt.Color(102, 102, 102));
-        jTextField2.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+        jUsernameField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jUsernameField.setForeground(new java.awt.Color(102, 102, 102));
+        jUsernameField.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        jUsernameField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
+                jUsernameFieldActionPerformed(evt);
             }
         });
 
-        jPasswordField1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jPasswordField1.setForeground(new java.awt.Color(102, 102, 102));
-        jPasswordField1.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        jPasswordField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jPasswordField.setForeground(new java.awt.Color(102, 102, 102));
+        jPasswordField.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
 
         LoginButton.setBackground(new java.awt.Color(255, 255, 255));
         LoginButton.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
@@ -120,8 +144,8 @@ public class Login extends javax.swing.JFrame {
                                     .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addGap(115, 115, 115))
                                 .addComponent(jLabel1)
-                                .addComponent(jPasswordField1, javax.swing.GroupLayout.DEFAULT_SIZE, 365, Short.MAX_VALUE)
-                                .addComponent(jTextField2)))))
+                                .addComponent(jPasswordField, javax.swing.GroupLayout.DEFAULT_SIZE, 365, Short.MAX_VALUE)
+                                .addComponent(jUsernameField)))))
                 .addContainerGap(73, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -133,11 +157,11 @@ public class Login extends javax.swing.JFrame {
                 .addGap(85, 85, 85)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jUsernameField, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPasswordField, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 76, Short.MAX_VALUE)
                 .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -148,9 +172,9 @@ public class Login extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
+    private void jUsernameFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jUsernameFieldActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField2ActionPerformed
+    }//GEN-LAST:event_jUsernameFieldActionPerformed
 
     private void jLabel3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel3MouseClicked
         // TODO add your handling code here:
@@ -162,9 +186,14 @@ public class Login extends javax.swing.JFrame {
 
     private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
         // TODO add your handling code here:
-        Menu menu = new Menu();
-        menu.setVisible(true);
-        this.dispose();
+        String username = this.jUsernameField.getText();
+        String password = this.jPasswordField.getText();
+        
+        if(validateLogin(username, password)){
+            Menu menu = new Menu();
+            menu.setVisible(true);
+            this.dispose();  
+        }
     }//GEN-LAST:event_LoginButtonActionPerformed
 
     /**
@@ -209,7 +238,7 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPasswordField jPasswordField1;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JPasswordField jPasswordField;
+    private javax.swing.JTextField jUsernameField;
     // End of variables declaration//GEN-END:variables
 }

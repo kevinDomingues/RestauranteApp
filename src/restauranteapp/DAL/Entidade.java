@@ -28,6 +28,7 @@ import javax.persistence.Table;
 @NamedQueries({
     @NamedQuery(name = "Entidade.findAll", query = "SELECT e FROM Entidade e"),
     @NamedQuery(name = "Entidade.findByIdEntidade", query = "SELECT e FROM Entidade e WHERE e.idEntidade = :idEntidade"),
+    @NamedQuery(name = "Entidade.findByUsername", query = "SELECT e FROM Entidade e WHERE e.username = :username"),
     @NamedQuery(name = "Entidade.findByNome", query = "SELECT e FROM Entidade e WHERE e.nome = :nome"),
     @NamedQuery(name = "Entidade.findByNif", query = "SELECT e FROM Entidade e WHERE e.nif = :nif"),
     @NamedQuery(name = "Entidade.findByRua", query = "SELECT e FROM Entidade e WHERE e.rua = :rua"),
@@ -43,6 +44,9 @@ public class Entidade implements Serializable {
     @Basic(optional = false)
     @Column(name = "ID_ENTIDADE")
     private Integer idEntidade;
+    @Basic(optional = false)
+    @Column(name = "USERNAME")
+    private String username;
     @Basic(optional = false)
     @Column(name = "NOME")
     private String nome;
@@ -79,8 +83,9 @@ public class Entidade implements Serializable {
         this.idEntidade = idEntidade;
     }
 
-    public Entidade(Integer idEntidade, String nome, int nif, String rua, int nporta, int nivelpermissao) {
+    public Entidade(Integer idEntidade, String username, String nome, int nif, String rua, int nporta, int nivelpermissao) {
         this.idEntidade = idEntidade;
+        this.username = username;
         this.nome = nome;
         this.nif = nif;
         this.rua = rua;
@@ -94,6 +99,14 @@ public class Entidade implements Serializable {
 
     public void setIdEntidade(Integer idEntidade) {
         this.idEntidade = idEntidade;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getNome() {
