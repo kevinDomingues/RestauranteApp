@@ -5,7 +5,7 @@
  */
 package restauranteapp;
 
-import GUI.Login;
+import UI.Login;
 import javax.persistence.EntityManager;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
