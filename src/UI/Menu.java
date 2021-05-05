@@ -17,6 +17,7 @@ public class Menu extends javax.swing.JFrame {
     public Menu() {
         initComponents();
         setLocationRelativeTo(null);
+        SwitchPanel(1);
     }
 
     public void setRoundButtons() {
@@ -34,11 +35,11 @@ public class Menu extends javax.swing.JFrame {
     public void SwitchPanel(int panelNumber) {
         clearPanels();
         switch(panelNumber){
-            case 1: this.verMesas.setVisible(true);
-            case 2: this.verPedidos.setVisible(true);
-            case 3: this.verProdutos.setVisible(true);
-            case 4: this.verEncomendas.setVisible(true);
-            case 5: this.mesas.setVisible(true);
+            case 1: this.verMesas.setVisible(true); break;
+            case 2: this.verPedidos.setVisible(true); break;
+            case 3: this.verProdutos.setVisible(true); break;
+            case 4: this.verEncomendas.setVisible(true); break;
+            case 5: this.mesas.setVisible(true); break;
         }
     }
     
