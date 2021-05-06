@@ -8,7 +8,10 @@ package UI;
 import java.util.List;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.swing.JOptionPane;
+import restauranteapp.BLL.CodpostaisJpaController;
 import restauranteapp.BLL.EntidadeJpaController;
+import restauranteapp.DAL.Codpostais;
 import restauranteapp.DAL.Entidade;
 
 /**
@@ -24,6 +27,7 @@ public class Login extends javax.swing.JFrame {
         initComponents();
         this.setLocationRelativeTo(null);
         SwitchPanel(1);
+        populateCodPostais();
     }
        
     public void validateLogin(String username, String password){
@@ -45,6 +49,81 @@ public class Login extends javax.swing.JFrame {
             new Menu(temp).setVisible(true);
             this.dispose();
         } 
+        
+    }
+    
+    private void populateCodPostais(){
+        EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("RestauranteAppPU");
+        CodpostaisJpaController Cc = new CodpostaisJpaController(entityManagerFactory);
+        
+        List<Codpostais> cods = Cc.findCodpostaisEntities();
+        
+        for(Codpostais e : cods){
+            this.criarContaCodPostalComboBox.addItem(e.toString());
+        }
+        
+    }
+    
+    private boolean usernameTaken(String username){
+        EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("RestauranteAppPU");
+        EntidadeJpaController ec = new EntidadeJpaController(entityManagerFactory);
+        
+        List<Entidade> users = ec.findEntidadeEntities();
+        
+        boolean alreadyexists = false;
+        for(Entidade e: users){
+            if(e.getUsername().equals(username)){
+               alreadyexists = true;
+               JOptionPane.showMessageDialog(null, "Username já utilizado!!");
+            }
+        }
+        return alreadyexists;
+    }
+    
+    private boolean passwordCheck(String password, String password2){
+        return password.equals(password2);
+    }
+    
+    private String formatText(String nomeCompleto) throws IllegalArgumentException {
+        
+        String[] nomes = nomeCompleto.trim().split("\\s+");
+        
+
+        if(nomes.length <= 0) {
+            throw new IllegalArgumentException("O nome não pode ser vazio");
+        }
+        
+
+        for (int i = 0; i < nomes.length; i++) {
+            StringBuilder sb = new StringBuilder(nomes[i].toLowerCase());
+
+            // altera o primeiro caráter para letra maiúscula
+            sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
+
+            // atualiza a string com o nome formatado
+            nomes[i] = sb.toString();
+        }
+
+        // junta todos os nomes
+        return String.join(" ", nomes);
+    
+    }
+    
+    public void criarConta(){
+        String username = this.criarContaUsername.getText().trim();
+        String nomeCompleto = formatText(this.criarContaUsername.getText());
+        int nif = Integer.parseInt(this.criarContaNif.getText().trim());
+        String rua = this.criarContaRua.getText();
+        int nPorta = Integer.parseInt(this.criarContaNPorta.getText().trim());
+        String codPostal = null; //this.criarContaCodPostal.getText().trim();
+        String password = this.criarContaPassword.getText();
+        String password2 = this.criarContaPassword2.getText();
+                
+        if(!usernameTaken(username) && passwordCheck(password, password2)){
+            Entidade temp = new Entidade();
+        }
+        
+        
         
     }
     
@@ -75,7 +154,7 @@ public class Login extends javax.swing.JFrame {
         LoginPanel = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
+        criarContaButton = new javax.swing.JLabel();
         jUsernameField = new javax.swing.JTextField();
         jPasswordField = new javax.swing.JPasswordField();
         LoginButton = new javax.swing.JButton();
@@ -85,23 +164,25 @@ public class Login extends javax.swing.JFrame {
         jPanel4 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        criarContaUsername = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
-        jPasswordField1 = new javax.swing.JPasswordField();
+        criarContaPassword = new javax.swing.JPasswordField();
         jLabel8 = new javax.swing.JLabel();
-        jPasswordField2 = new javax.swing.JPasswordField();
+        criarContaPassword2 = new javax.swing.JPasswordField();
         jLabel9 = new javax.swing.JLabel();
-        jTextField3 = new javax.swing.JTextField();
+        criarContaNome = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
-        jTextField4 = new javax.swing.JTextField();
-        jTextField5 = new javax.swing.JTextField();
+        criarContaNif = new javax.swing.JTextField();
+        criarContaRua = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
-        jTextField6 = new javax.swing.JTextField();
+        criarContaNPorta = new javax.swing.JTextField();
         jLabel12 = new javax.swing.JLabel();
-        jTextField7 = new javax.swing.JTextField();
         jLabel13 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jLabel14 = new javax.swing.JLabel();
+        jLabel15 = new javax.swing.JLabel();
+        criarEmail = new javax.swing.JTextField();
+        criarContaCodPostalComboBox = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -124,15 +205,15 @@ public class Login extends javax.swing.JFrame {
         jLabel2.setText("Login");
         LoginPanel.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(226, 62, -1, -1));
 
-        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel3.setForeground(new java.awt.Color(102, 204, 255));
-        jLabel3.setText("Criar conta");
-        jLabel3.addMouseListener(new java.awt.event.MouseAdapter() {
+        criarContaButton.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        criarContaButton.setForeground(new java.awt.Color(102, 204, 255));
+        criarContaButton.setText("Criar conta");
+        criarContaButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jLabel3MouseClicked(evt);
+                criarContaButtonMouseClicked(evt);
             }
         });
-        LoginPanel.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(239, 451, -1, -1));
+        LoginPanel.add(criarContaButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(239, 451, -1, -1));
 
         jUsernameField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jUsernameField.setForeground(new java.awt.Color(102, 102, 102));
@@ -181,12 +262,12 @@ public class Login extends javax.swing.JFrame {
         jLabel6.setForeground(new java.awt.Color(102, 102, 102));
         jLabel6.setText("Username:");
 
-        jTextField2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jTextField2.setForeground(new java.awt.Color(102, 102, 102));
-        jTextField2.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+        criarContaUsername.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        criarContaUsername.setForeground(new java.awt.Color(102, 102, 102));
+        criarContaUsername.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        criarContaUsername.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
+                criarContaUsernameActionPerformed(evt);
             }
         });
 
@@ -194,28 +275,28 @@ public class Login extends javax.swing.JFrame {
         jLabel7.setForeground(new java.awt.Color(102, 102, 102));
         jLabel7.setText("Password:");
 
-        jPasswordField1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jPasswordField1.setForeground(new java.awt.Color(102, 102, 102));
-        jPasswordField1.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        criarContaPassword.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        criarContaPassword.setForeground(new java.awt.Color(102, 102, 102));
+        criarContaPassword.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
 
         jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(102, 102, 102));
         jLabel8.setText("Confirmar password:");
 
-        jPasswordField2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jPasswordField2.setForeground(new java.awt.Color(102, 102, 102));
-        jPasswordField2.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        criarContaPassword2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        criarContaPassword2.setForeground(new java.awt.Color(102, 102, 102));
+        criarContaPassword2.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
 
         jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel9.setForeground(new java.awt.Color(102, 102, 102));
         jLabel9.setText("Nome Completo:");
 
-        jTextField3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jTextField3.setForeground(new java.awt.Color(102, 102, 102));
-        jTextField3.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
-        jTextField3.addActionListener(new java.awt.event.ActionListener() {
+        criarContaNome.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        criarContaNome.setForeground(new java.awt.Color(102, 102, 102));
+        criarContaNome.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        criarContaNome.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField3ActionPerformed(evt);
+                criarContaNomeActionPerformed(evt);
             }
         });
 
@@ -223,21 +304,21 @@ public class Login extends javax.swing.JFrame {
         jLabel10.setForeground(new java.awt.Color(102, 102, 102));
         jLabel10.setText("NIF:");
 
-        jTextField4.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jTextField4.setForeground(new java.awt.Color(102, 102, 102));
-        jTextField4.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
-        jTextField4.addActionListener(new java.awt.event.ActionListener() {
+        criarContaNif.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        criarContaNif.setForeground(new java.awt.Color(102, 102, 102));
+        criarContaNif.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        criarContaNif.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField4ActionPerformed(evt);
+                criarContaNifActionPerformed(evt);
             }
         });
 
-        jTextField5.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jTextField5.setForeground(new java.awt.Color(102, 102, 102));
-        jTextField5.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
-        jTextField5.addActionListener(new java.awt.event.ActionListener() {
+        criarContaRua.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        criarContaRua.setForeground(new java.awt.Color(102, 102, 102));
+        criarContaRua.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        criarContaRua.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField5ActionPerformed(evt);
+                criarContaRuaActionPerformed(evt);
             }
         });
 
@@ -245,27 +326,18 @@ public class Login extends javax.swing.JFrame {
         jLabel11.setForeground(new java.awt.Color(102, 102, 102));
         jLabel11.setText("Rua:");
 
-        jTextField6.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jTextField6.setForeground(new java.awt.Color(102, 102, 102));
-        jTextField6.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
-        jTextField6.addActionListener(new java.awt.event.ActionListener() {
+        criarContaNPorta.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        criarContaNPorta.setForeground(new java.awt.Color(102, 102, 102));
+        criarContaNPorta.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        criarContaNPorta.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField6ActionPerformed(evt);
+                criarContaNPortaActionPerformed(evt);
             }
         });
 
         jLabel12.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel12.setForeground(new java.awt.Color(102, 102, 102));
         jLabel12.setText("Número porta:");
-
-        jTextField7.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jTextField7.setForeground(new java.awt.Color(102, 102, 102));
-        jTextField7.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
-        jTextField7.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField7ActionPerformed(evt);
-            }
-        });
 
         jLabel13.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel13.setForeground(new java.awt.Color(102, 102, 102));
@@ -286,103 +358,159 @@ public class Login extends javax.swing.JFrame {
             }
         });
 
+        jLabel15.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel15.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel15.setText("Email:");
+
+        criarEmail.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        criarEmail.setForeground(new java.awt.Color(102, 102, 102));
+        criarEmail.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        criarEmail.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                criarEmailActionPerformed(evt);
+            }
+        });
+
+        criarContaCodPostalComboBox.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        criarContaCodPostalComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] {}));
+        criarContaCodPostalComboBox.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel4Layout.createSequentialGroup()
-                            .addGap(114, 114, 114)
-                            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(jLabel9)
-                                .addComponent(jLabel8)
-                                .addComponent(jLabel7)
-                                .addComponent(jLabel6)
-                                .addComponent(jTextField2)
-                                .addComponent(jLabel10)
-                                .addComponent(jLabel11)
-                                .addComponent(jLabel12)
-                                .addComponent(jLabel13)
-                                .addComponent(jPasswordField1)
-                                .addComponent(jTextField7)
-                                .addComponent(jTextField6)
-                                .addComponent(jTextField5)
-                                .addComponent(jTextField4)
-                                .addComponent(jTextField3)
-                                .addComponent(jPasswordField2, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGroup(jPanel4Layout.createSequentialGroup()
-                            .addGap(197, 197, 197)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                            .addContainerGap()
-                            .addComponent(jLabel5)
-                            .addGap(63, 63, 63)))
                     .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGap(242, 242, 242)
-                        .addComponent(jLabel14)))
-                .addContainerGap(114, Short.MAX_VALUE))
+                        .addGap(180, 180, 180)
+                        .addComponent(jLabel5))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(jLabel6))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(criarContaUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(jLabel9))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(criarContaNome, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(jLabel15))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(criarEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(jLabel10))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(criarContaNif, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(jLabel11))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(criarContaRua, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(jLabel12))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(criarContaNPorta, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(jLabel13))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(criarContaCodPostalComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(jLabel7))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(criarContaPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(jLabel8))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(criarContaPassword2, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addGap(50, 50, 50)
+                                .addComponent(jLabel14)))
+                        .addGap(95, 95, 95)))
+                .addGap(91, 91, 91))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap(21, Short.MAX_VALUE)
+                .addGap(50, 50, 50)
                 .addComponent(jLabel5)
-                .addGap(18, 18, 18)
+                .addGap(72, 72, 72)
                 .addComponent(jLabel6)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(15, 15, 15)
+                .addComponent(criarContaUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14)
                 .addComponent(jLabel9)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(5, 5, 5)
+                .addComponent(criarContaNome, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(24, 24, 24)
+                .addComponent(jLabel15)
+                .addGap(5, 5, 5)
+                .addComponent(criarEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14)
                 .addComponent(jLabel10)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(5, 5, 5)
+                .addComponent(criarContaNif, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14)
                 .addComponent(jLabel11)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(5, 5, 5)
+                .addComponent(criarContaRua, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14)
                 .addComponent(jLabel12)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(15, 15, 15)
+                .addComponent(criarContaNPorta, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14)
                 .addComponent(jLabel13)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(5, 5, 5)
+                .addComponent(criarContaCodPostalComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14)
                 .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(5, 5, 5)
+                .addComponent(criarContaPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(24, 24, 24)
                 .addComponent(jLabel8)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPasswordField2, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(53, 53, 53)
+                .addGap(5, 5, 5)
+                .addComponent(criarContaPassword2, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(8, 8, 8)
                 .addComponent(jLabel14)
-                .addGap(15, 15, 15))
+                .addGap(29, 29, 29))
         );
 
         jScrollPane1.setViewportView(jPanel4);
 
         CriarContaPanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
-        LayeredPanel.add(CriarContaPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, 530));
+        LayeredPanel.add(CriarContaPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 550, 530));
 
         getContentPane().add(LayeredPanel, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jLabel3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel3MouseClicked
+    private void criarContaButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_criarContaButtonMouseClicked
         // TODO add your handling code here:
         SwitchPanel(2);
-    }//GEN-LAST:event_jLabel3MouseClicked
+    }//GEN-LAST:event_criarContaButtonMouseClicked
 
     private void jUsernameFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jUsernameFieldActionPerformed
         // TODO add your handling code here:
@@ -396,33 +524,33 @@ public class Login extends javax.swing.JFrame {
         validateLogin(username, password);
     }//GEN-LAST:event_LoginButtonActionPerformed
 
-    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
+    private void criarContaUsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_criarContaUsernameActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField2ActionPerformed
+    }//GEN-LAST:event_criarContaUsernameActionPerformed
 
-    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
+    private void criarContaNomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_criarContaNomeActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField3ActionPerformed
+    }//GEN-LAST:event_criarContaNomeActionPerformed
 
-    private void jTextField4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField4ActionPerformed
+    private void criarContaNifActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_criarContaNifActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField4ActionPerformed
+    }//GEN-LAST:event_criarContaNifActionPerformed
 
-    private void jTextField5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField5ActionPerformed
+    private void criarContaRuaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_criarContaRuaActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField5ActionPerformed
+    }//GEN-LAST:event_criarContaRuaActionPerformed
 
-    private void jTextField6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField6ActionPerformed
+    private void criarContaNPortaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_criarContaNPortaActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField6ActionPerformed
-
-    private void jTextField7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField7ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField7ActionPerformed
+    }//GEN-LAST:event_criarContaNPortaActionPerformed
 
     private void jLabel14MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel14MouseClicked
         SwitchPanel(1);
     }//GEN-LAST:event_jLabel14MouseClicked
+
+    private void criarEmailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_criarEmailActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_criarEmailActionPerformed
 
     /**
      * @param args the command line arguments
@@ -466,6 +594,16 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JLayeredPane LayeredPanel;
     private javax.swing.JButton LoginButton;
     private javax.swing.JPanel LoginPanel;
+    private javax.swing.JLabel criarContaButton;
+    private javax.swing.JComboBox<String> criarContaCodPostalComboBox;
+    private javax.swing.JTextField criarContaNPorta;
+    private javax.swing.JTextField criarContaNif;
+    private javax.swing.JTextField criarContaNome;
+    private javax.swing.JPasswordField criarContaPassword;
+    private javax.swing.JPasswordField criarContaPassword2;
+    private javax.swing.JTextField criarContaRua;
+    private javax.swing.JTextField criarContaUsername;
+    private javax.swing.JTextField criarEmail;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -473,8 +611,8 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -484,15 +622,7 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPasswordField jPasswordField;
-    private javax.swing.JPasswordField jPasswordField1;
-    private javax.swing.JPasswordField jPasswordField2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField5;
-    private javax.swing.JTextField jTextField6;
-    private javax.swing.JTextField jTextField7;
     private javax.swing.JTextField jUsernameField;
     // End of variables declaration//GEN-END:variables
 }
