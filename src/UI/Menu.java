@@ -5,19 +5,24 @@
  */
 package UI;
 
+import restauranteapp.DAL.Entidade;
+
 /**
  *
  * @author kevin
  */
 public class Menu extends javax.swing.JFrame {
 
+    private Entidade temp;
     /**
      * Creates new form Menu
      */
-    public Menu() {
+    public Menu(Entidade temp) {
+        this.temp = temp;
         initComponents();
         setLocationRelativeTo(null);
         SwitchPanel(6);
+        this.Username.setText(temp.getNome());
     }
 
     public void setRoundButtons() {
@@ -65,6 +70,7 @@ public class Menu extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         jPanel26 = new javax.swing.JPanel();
+        Username = new javax.swing.JLabel();
         jLayeredPane1 = new javax.swing.JLayeredPane();
         defaultpanel = new javax.swing.JPanel();
         verProdutos = new javax.swing.JPanel();
@@ -270,15 +276,22 @@ public class Menu extends javax.swing.JFrame {
         jPanel26.setBackground(new java.awt.Color(102, 204, 255));
         jPanel26.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
+        Username.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        Username.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        Username.setText("jLabel45");
+
         javax.swing.GroupLayout jPanel26Layout = new javax.swing.GroupLayout(jPanel26);
         jPanel26.setLayout(jPanel26Layout);
         jPanel26Layout.setHorizontalGroup(
             jPanel26Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 286, Short.MAX_VALUE)
+            .addComponent(Username, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 286, Short.MAX_VALUE)
         );
         jPanel26Layout.setVerticalGroup(
             jPanel26Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 206, Short.MAX_VALUE)
+            .addGroup(jPanel26Layout.createSequentialGroup()
+                .addGap(47, 47, 47)
+                .addComponent(Username, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(113, Short.MAX_VALUE))
         );
 
         jPanel1.add(jPanel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 290, 210));
@@ -2054,13 +2067,14 @@ public class Menu extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Menu().setVisible(true);
+                new Menu(new Entidade()).setVisible(true);
                 
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel Username;
     private javax.swing.JPanel defaultpanel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

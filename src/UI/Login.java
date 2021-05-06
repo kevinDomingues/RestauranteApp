@@ -26,19 +26,26 @@ public class Login extends javax.swing.JFrame {
         SwitchPanel(1);
     }
        
-    public boolean validateLogin(String username, String password){
+    public void validateLogin(String username, String password){
         EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("RestauranteAppPU");
         EntidadeJpaController ec = new EntidadeJpaController(entityManagerFactory);
         
         List<Entidade> users = ec.findEntidadeEntities();
+        Entidade temp = new Entidade();
         boolean loginStatus = false;
         
         for(Entidade e : users){
             if(e.getUsername().equals(username) && e.getPasswordp().equals(password)){
+                temp = e;
                 loginStatus = true;
             }
         }
-        return loginStatus;
+        
+        if(loginStatus) {
+            new Menu(temp).setVisible(true);
+            this.dispose();
+        } 
+        
     }
     
     public void clearPanels() {
@@ -386,11 +393,7 @@ public class Login extends javax.swing.JFrame {
         String username = this.jUsernameField.getText();
         String password = this.jPasswordField.getText();
 
-        if(validateLogin(username, password)){
-            Menu menu = new Menu();
-            menu.setVisible(true);
-            this.dispose();
-        }
+        validateLogin(username, password);
     }//GEN-LAST:event_LoginButtonActionPerformed
 
     private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
