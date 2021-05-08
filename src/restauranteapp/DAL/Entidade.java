@@ -71,6 +71,9 @@ public class Entidade implements Serializable {
     @JoinColumn(name = "CODPOSTAL", referencedColumnName = "CODPOSTAL")
     @ManyToOne(optional = false)
     private Codpostais codpostal;
+    @JoinColumn(name = "ID_EMPRESA", referencedColumnName = "ID_EMPRESA")
+    @ManyToOne(optional = false)
+    private Empresa idEmpresa;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idEntidade")
     private List<Pedido> pedidoList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idEntidade")
@@ -179,6 +182,14 @@ public class Entidade implements Serializable {
 
     public void setCodpostal(Codpostais codpostal) {
         this.codpostal = codpostal;
+    }
+
+    public Empresa getIdEmpresa() {
+        return idEmpresa;
+    }
+
+    public void setIdEmpresa(Empresa idEmpresa) {
+        this.idEmpresa = idEmpresa;
     }
 
     public List<Pedido> getPedidoList() {

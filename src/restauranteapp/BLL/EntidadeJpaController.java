@@ -11,6 +11,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import restauranteapp.DAL.Codpostais;
+import restauranteapp.DAL.Empresa;
 import restauranteapp.DAL.Pedido;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,11 @@ public class EntidadeJpaController implements Serializable {
                 codpostal = em.getReference(codpostal.getClass(), codpostal.getCodpostal());
                 entidade.setCodpostal(codpostal);
             }
+            Empresa idEmpresa = entidade.getIdEmpresa();
+            if (idEmpresa != null) {
+                idEmpresa = em.getReference(idEmpresa.getClass(), idEmpresa.getIdEmpresa());
+                entidade.setIdEmpresa(idEmpresa);
+            }
             List<Pedido> attachedPedidoList = new ArrayList<Pedido>();
             for (Pedido pedidoListPedidoToAttach : entidade.getPedidoList()) {
                 pedidoListPedidoToAttach = em.getReference(pedidoListPedidoToAttach.getClass(), pedidoListPedidoToAttach.getCodpedido());
@@ -69,6 +75,10 @@ public class EntidadeJpaController implements Serializable {
             if (codpostal != null) {
                 codpostal.getEntidadeList().add(entidade);
                 codpostal = em.merge(codpostal);
+            }
+            if (idEmpresa != null) {
+                idEmpresa.getEntidadeList().add(entidade);
+                idEmpresa = em.merge(idEmpresa);
             }
             for (Pedido pedidoListPedido : entidade.getPedidoList()) {
                 Entidade oldIdEntidadeOfPedidoListPedido = pedidoListPedido.getIdEntidade();
@@ -109,6 +119,8 @@ public class EntidadeJpaController implements Serializable {
             Entidade persistentEntidade = em.find(Entidade.class, entidade.getIdEntidade());
             Codpostais codpostalOld = persistentEntidade.getCodpostal();
             Codpostais codpostalNew = entidade.getCodpostal();
+            Empresa idEmpresaOld = persistentEntidade.getIdEmpresa();
+            Empresa idEmpresaNew = entidade.getIdEmpresa();
             List<Pedido> pedidoListOld = persistentEntidade.getPedidoList();
             List<Pedido> pedidoListNew = entidade.getPedidoList();
             List<Reserva> reservaListOld = persistentEntidade.getReservaList();
@@ -137,6 +149,10 @@ public class EntidadeJpaController implements Serializable {
                 codpostalNew = em.getReference(codpostalNew.getClass(), codpostalNew.getCodpostal());
                 entidade.setCodpostal(codpostalNew);
             }
+            if (idEmpresaNew != null) {
+                idEmpresaNew = em.getReference(idEmpresaNew.getClass(), idEmpresaNew.getIdEmpresa());
+                entidade.setIdEmpresa(idEmpresaNew);
+            }
             List<Pedido> attachedPedidoListNew = new ArrayList<Pedido>();
             for (Pedido pedidoListNewPedidoToAttach : pedidoListNew) {
                 pedidoListNewPedidoToAttach = em.getReference(pedidoListNewPedidoToAttach.getClass(), pedidoListNewPedidoToAttach.getCodpedido());
@@ -159,6 +175,14 @@ public class EntidadeJpaController implements Serializable {
             if (codpostalNew != null && !codpostalNew.equals(codpostalOld)) {
                 codpostalNew.getEntidadeList().add(entidade);
                 codpostalNew = em.merge(codpostalNew);
+            }
+            if (idEmpresaOld != null && !idEmpresaOld.equals(idEmpresaNew)) {
+                idEmpresaOld.getEntidadeList().remove(entidade);
+                idEmpresaOld = em.merge(idEmpresaOld);
+            }
+            if (idEmpresaNew != null && !idEmpresaNew.equals(idEmpresaOld)) {
+                idEmpresaNew.getEntidadeList().add(entidade);
+                idEmpresaNew = em.merge(idEmpresaNew);
             }
             for (Pedido pedidoListNewPedido : pedidoListNew) {
                 if (!pedidoListOld.contains(pedidoListNewPedido)) {
@@ -233,6 +257,11 @@ public class EntidadeJpaController implements Serializable {
             if (codpostal != null) {
                 codpostal.getEntidadeList().remove(entidade);
                 codpostal = em.merge(codpostal);
+            }
+            Empresa idEmpresa = entidade.getIdEmpresa();
+            if (idEmpresa != null) {
+                idEmpresa.getEntidadeList().remove(entidade);
+                idEmpresa = em.merge(idEmpresa);
             }
             em.remove(entidade);
             em.getTransaction().commit();

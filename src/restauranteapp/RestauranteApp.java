@@ -6,11 +6,13 @@
 package restauranteapp;
 
 import UI.Login;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.persistence.Persistence;
 import javax.persistence.EntityManagerFactory;
+import restauranteapp.BLL.EntidadeJpaController;
 
 import restauranteapp.DAL.Entidade;
 /**
@@ -34,8 +36,8 @@ public class RestauranteApp {
         
        // System.out.println("nome do cliente: "+entidade1.getNome());
         
-        Login login = new Login();
-        login.setVisible(true);
+       Login login = new Login();
+       login.setVisible(true); 
     }
     
 }

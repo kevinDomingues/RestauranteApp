@@ -34,6 +34,7 @@ public class Estado implements Serializable {
     @Basic(optional = false)
     @Column(name = "ID_ESTADO")
     private Integer idEstado;
+    @Basic(optional = false)
     @Column(name = "ESTADO")
     private String estado;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idEstado")
@@ -46,6 +47,11 @@ public class Estado implements Serializable {
 
     public Estado(Integer idEstado) {
         this.idEstado = idEstado;
+    }
+
+    public Estado(Integer idEstado, String estado) {
+        this.idEstado = idEstado;
+        this.estado = estado;
     }
 
     public Integer getIdEstado() {

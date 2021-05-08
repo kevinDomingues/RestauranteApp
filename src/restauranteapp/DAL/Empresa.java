@@ -6,7 +6,9 @@
 package restauranteapp.DAL;
 
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -14,6 +16,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -43,6 +46,8 @@ public class Empresa implements Serializable {
     @JoinColumn(name = "CODPOSTAL", referencedColumnName = "CODPOSTAL")
     @ManyToOne(optional = false)
     private Codpostais codpostal;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idEmpresa")
+    private List<Entidade> entidadeList;
 
     public Empresa() {
     }
@@ -87,6 +92,14 @@ public class Empresa implements Serializable {
 
     public void setCodpostal(Codpostais codpostal) {
         this.codpostal = codpostal;
+    }
+
+    public List<Entidade> getEntidadeList() {
+        return entidadeList;
+    }
+
+    public void setEntidadeList(List<Entidade> entidadeList) {
+        this.entidadeList = entidadeList;
     }
 
     @Override

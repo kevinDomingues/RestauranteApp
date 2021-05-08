@@ -118,7 +118,7 @@ public class Codpostais implements Serializable {
 
     @Override
     public String toString() {
-        return "restauranteapp.DAL.Codpostais[ codpostal=" + codpostal + " ]";
+        return this.codpostal + ", " + this.localidade;
     }
     
 }

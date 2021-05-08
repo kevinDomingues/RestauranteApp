@@ -46,7 +46,7 @@ public class Pedido implements Serializable {
     private Date datahora;
     @Basic(optional = false)
     @Column(name = "VALORTOTAL")
-    private int valortotal;
+    private double valortotal;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "pedido")
     private List<Linhapedido> linhapedidoList;
     @JoinColumn(name = "ID_ENTIDADE", referencedColumnName = "ID_ENTIDADE")
@@ -63,7 +63,7 @@ public class Pedido implements Serializable {
         this.codpedido = codpedido;
     }
 
-    public Pedido(Integer codpedido, Date datahora, int valortotal) {
+    public Pedido(Integer codpedido, Date datahora, double valortotal) {
         this.codpedido = codpedido;
         this.datahora = datahora;
         this.valortotal = valortotal;
@@ -85,11 +85,11 @@ public class Pedido implements Serializable {
         this.datahora = datahora;
     }
 
-    public int getValortotal() {
+    public double getValortotal() {
         return valortotal;
     }
 
-    public void setValortotal(int valortotal) {
+    public void setValortotal(double valortotal) {
         this.valortotal = valortotal;
     }
 
