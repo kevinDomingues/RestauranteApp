@@ -45,7 +45,7 @@ public class Entidade implements Serializable {
     @Id
     @Basic(optional = false)
     @Column(name = "ID_ENTIDADE")
-    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="SEQ_NAME")
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer idEntidade;
     @Basic(optional = false)
     @Column(name = "USERNAME")

@@ -39,8 +39,8 @@ public class LinhaencomendaJpaController implements Serializable {
         if (linhaencomenda.getLinhaencomendaPK() == null) {
             linhaencomenda.setLinhaencomendaPK(new LinhaencomendaPK());
         }
-        linhaencomenda.getLinhaencomendaPK().setIdStockproduto(linhaencomenda.getStockproduto().getIdStockproduto());
         linhaencomenda.getLinhaencomendaPK().setIdEncomenda(linhaencomenda.getEncomenda().getIdEncomenda());
+        linhaencomenda.getLinhaencomendaPK().setIdStockproduto(linhaencomenda.getStockproduto().getIdStockproduto());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -78,8 +78,8 @@ public class LinhaencomendaJpaController implements Serializable {
     }
 
     public void edit(Linhaencomenda linhaencomenda) throws NonexistentEntityException, Exception {
-        linhaencomenda.getLinhaencomendaPK().setIdStockproduto(linhaencomenda.getStockproduto().getIdStockproduto());
         linhaencomenda.getLinhaencomendaPK().setIdEncomenda(linhaencomenda.getEncomenda().getIdEncomenda());
+        linhaencomenda.getLinhaencomendaPK().setIdStockproduto(linhaencomenda.getStockproduto().getIdStockproduto());
         EntityManager em = null;
         try {
             em = getEntityManager();

@@ -152,6 +152,7 @@ public class Login extends javax.swing.JFrame {
 
             if(!usernameTaken(username) && passwordCheck(password, password2)){
                 Entidade temp = new Entidade();
+                temp.setIdEntidade(null);
                 temp.setCodpostal(codPostal);
                 temp.setEmail(email);
                 temp.setIdEmpresa(empControl.findEmpresa(1));
