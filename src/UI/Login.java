@@ -45,8 +45,10 @@ public class Login extends javax.swing.JFrame {
         
         for(Entidade e : users){
             if(e.getUsername().equals(username) && e.getPasswordp().equals(password)){
-                temp = e;
-                loginStatus = true;
+                if(e.getNivelpermissao()==2){
+                    temp = e;
+                    loginStatus = true;
+                } else JOptionPane.showMessageDialog(null, "Não tem permissão para entrar!");
             }
         }
         
@@ -65,7 +67,18 @@ public class Login extends javax.swing.JFrame {
         for(Codpostais e : cods){
             this.criarContaCodPostalComboBox.addItem(e.toString());
         }
-        
+    }
+    
+    private void clearFields(){
+            this.criarContaUsername.setText(null);
+            this.criarContaNome.setText(null);
+            this.criarContaEmail.setText(null);
+            this.criarContaContacto.setText(null);
+            this.criarContaNif.setText(null);
+            this.criarContaRua.setText(null);
+            this.criarContaNPorta.setText(null);
+            this.criarContaPassword.setText(null);
+            this.criarContaPassword2.setText(null);
     }
     
     private boolean usernameTaken(String username){
@@ -126,6 +139,15 @@ public class Login extends javax.swing.JFrame {
                 && !this.criarContaPassword2.getText().isEmpty();
     }
     
+     private boolean checkNifAndContacto() {
+        if(this.criarContaNif.getText().length()==9 && this.criarContaContacto.getText().length()==9){
+            return true;
+        } else{
+            JOptionPane.showMessageDialog(null, "Nif e Contacto devem ter 9 dígitos!");
+            return false;
+        }
+    }
+    
     public void criarConta(){
         CodpostaisJpaController postalControl = new CodpostaisJpaController(this.em);
         EmpresaJpaController empControl = new EmpresaJpaController(this.em);
@@ -142,7 +164,7 @@ public class Login extends javax.swing.JFrame {
             String rua = this.criarContaRua.getText();
             int nPorta = Integer.parseInt(this.criarContaNPorta.getText().trim());
 
-            String codPostaltemp = this.criarContaCodPostalComboBox.getSelectedItem().toString(); //this.criarContaCodPostal.getText().trim();
+            String codPostaltemp = this.criarContaCodPostalComboBox.getSelectedItem().toString();
             Codpostais codPostal = postalControl.findCodpostais(codPostaltemp);
 
             String password = this.criarContaPassword.getText();
@@ -151,29 +173,31 @@ public class Login extends javax.swing.JFrame {
 
 
             if(!usernameTaken(username) && passwordCheck(password, password2)){
-                Entidade temp = new Entidade();
-                temp.setIdEntidade(null);
-                temp.setCodpostal(codPostal);
-                temp.setEmail(email);
-                temp.setIdEmpresa(empControl.findEmpresa(1));
-                temp.setNif(nif);
-                temp.setNivelpermissao(2);
-                temp.setNome(nomeCompleto);
-                temp.setNporta(nPorta);
-                temp.setPasswordp(password);
-                temp.setRua(rua);
-                temp.setTelefone(telefone);
-                temp.setUsername(username);
-
-                try {
-                    ec.create(temp);
-                    JOptionPane.showMessageDialog(null, "Conta criada!");
-                    SwitchPanel(1);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null, "Erro ao criar conta!!");
+                if(checkNifAndContacto()){
+                    Entidade temp = new Entidade();
+                    temp.setIdEntidade(null);
+                    temp.setCodpostal(codPostal);
+                    temp.setEmail(email);
+                    temp.setIdEmpresa(empControl.findEmpresa(1));
+                    temp.setNif(nif);
+                    temp.setNivelpermissao(2);
+                    temp.setNome(nomeCompleto);
+                    temp.setNporta(nPorta);
+                    temp.setPasswordp(password);
+                    temp.setRua(rua);
+                    temp.setTelefone(telefone);
+                    temp.setUsername(username);
+         
+                    try {
+                        ec.create(temp);
+                        JOptionPane.showMessageDialog(null, "Conta criada!");
+                        SwitchPanel(1);
+                        clearFields();
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(null, "Erro ao criar conta!!");
+                    }
                 }
             }
-        
         } else JOptionPane.showMessageDialog(null, "Preencha todos os dados!");
         
     }
@@ -230,7 +254,7 @@ public class Login extends javax.swing.JFrame {
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
         criarConta = new javax.swing.JButton();
-        jLabel14 = new javax.swing.JLabel();
+        CancelarButton = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
         criarContaEmail = new javax.swing.JTextField();
         criarContaCodPostalComboBox = new javax.swing.JComboBox<>();
@@ -407,12 +431,12 @@ public class Login extends javax.swing.JFrame {
             }
         });
 
-        jLabel14.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel14.setForeground(new java.awt.Color(102, 204, 255));
-        jLabel14.setText("Cancelar");
-        jLabel14.addMouseListener(new java.awt.event.MouseAdapter() {
+        CancelarButton.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        CancelarButton.setForeground(new java.awt.Color(102, 204, 255));
+        CancelarButton.setText("Cancelar");
+        CancelarButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jLabel14MouseClicked(evt);
+                CancelarButtonMouseClicked(evt);
             }
         });
 
@@ -512,7 +536,7 @@ public class Login extends javax.swing.JFrame {
                             .addComponent(criarConta, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel4Layout.createSequentialGroup()
                                 .addGap(50, 50, 50)
-                                .addComponent(jLabel14)))
+                                .addComponent(CancelarButton)))
                         .addGap(95, 95, 95))
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addGap(110, 110, 110)
@@ -570,7 +594,7 @@ public class Login extends javax.swing.JFrame {
                 .addGap(54, 54, 54)
                 .addComponent(criarConta, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(8, 8, 8)
-                .addComponent(jLabel14)
+                .addComponent(CancelarButton)
                 .addGap(29, 29, 29))
         );
 
@@ -622,9 +646,10 @@ public class Login extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_criarContaNPortaActionPerformed
 
-    private void jLabel14MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel14MouseClicked
+    private void CancelarButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_CancelarButtonMouseClicked
         SwitchPanel(1);
-    }//GEN-LAST:event_jLabel14MouseClicked
+        clearFields();
+    }//GEN-LAST:event_CancelarButtonMouseClicked
 
     private void criarContaEmailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_criarContaEmailActionPerformed
         // TODO add your handling code here:
@@ -677,6 +702,7 @@ public class Login extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel CancelarButton;
     private javax.swing.JPanel CriarContaPanel;
     private javax.swing.JLayeredPane LayeredPanel;
     private javax.swing.JButton LoginButton;
@@ -698,7 +724,6 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel2;
@@ -714,4 +739,5 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jUsernameField;
     // End of variables declaration//GEN-END:variables
+
 }
