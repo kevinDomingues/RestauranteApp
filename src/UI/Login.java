@@ -84,7 +84,13 @@ public class Login extends javax.swing.JFrame {
     }
     
     private boolean passwordCheck(String password, String password2){
-        return password.equals(password2);
+        if(password.equals(password2)){
+            return true;
+        } else {
+            JOptionPane.showMessageDialog(null, "A password não é igual!!");
+            return false;
+        }
+        
     }
     
     private String formatText(String nomeCompleto) throws IllegalArgumentException {
@@ -112,49 +118,62 @@ public class Login extends javax.swing.JFrame {
     
     }
     
+    public boolean NoEmptyFields(){
+        return !this.criarContaUsername.getText().isEmpty() && !this.criarContaNome.getText().isEmpty() 
+                && !this.criarContaEmail.getText().isEmpty() && !this.criarContaContacto.getText().isEmpty()
+                && !this.criarContaNif.getText().isEmpty() && !this.criarContaRua.getText().isEmpty()
+                && !this.criarContaNPorta.getText().isEmpty() && !this.criarContaPassword.getText().isEmpty()
+                && !this.criarContaPassword2.getText().isEmpty();
+    }
+    
     public void criarConta(){
         CodpostaisJpaController postalControl = new CodpostaisJpaController(this.em);
         EmpresaJpaController empControl = new EmpresaJpaController(this.em);
         EntidadeJpaController ec = new EntidadeJpaController(this.em);
         
-        String username = this.criarContaUsername.getText().trim();
-        String nomeCompleto = formatText(this.criarContaUsername.getText());
-        String email = this.criarContaEmail.getText().trim();
-        int telefone = Integer.parseInt(this.criarContaContacto.getText().trim());
-        int nif = Integer.parseInt(this.criarContaNif.getText().trim());
-        String rua = this.criarContaRua.getText();
-        int nPorta = Integer.parseInt(this.criarContaNPorta.getText().trim());
         
-        String codPostaltemp = this.criarContaCodPostalComboBox.getSelectedItem().toString(); //this.criarContaCodPostal.getText().trim();
-        Codpostais codPostal = postalControl.findCodpostais(codPostaltemp);
-        
-        String password = this.criarContaPassword.getText();
-        String password2 = this.criarContaPassword2.getText();
-        
-        
-                
-        if(!usernameTaken(username) && passwordCheck(password, password2)){
-            Entidade temp = new Entidade();
-            temp.setCodpostal(codPostal);
-            temp.setEmail(email);
-            temp.setIdEmpresa(empControl.findEmpresa(1));
-            temp.setNif(nif);
-            temp.setNivelpermissao(2);
-            temp.setNome(nomeCompleto);
-            temp.setNporta(nPorta);
-            temp.setPasswordp(password);
-            temp.setRua(rua);
-            temp.setTelefone(telefone);
-            temp.setUsername(username);
+        if(NoEmptyFields()){
             
-            try {
-                ec.create(temp);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Erro ao criar conta!!");
+            String username = this.criarContaUsername.getText().trim();
+            String nomeCompleto = formatText(this.criarContaNome.getText());
+            String email = this.criarContaEmail.getText().trim();
+            int telefone = Integer.parseInt(this.criarContaContacto.getText().trim());
+            int nif = Integer.parseInt(this.criarContaNif.getText().trim());
+            String rua = this.criarContaRua.getText();
+            int nPorta = Integer.parseInt(this.criarContaNPorta.getText().trim());
+
+            String codPostaltemp = this.criarContaCodPostalComboBox.getSelectedItem().toString(); //this.criarContaCodPostal.getText().trim();
+            Codpostais codPostal = postalControl.findCodpostais(codPostaltemp);
+
+            String password = this.criarContaPassword.getText();
+            String password2 = this.criarContaPassword2.getText();
+
+
+
+            if(!usernameTaken(username) && passwordCheck(password, password2)){
+                Entidade temp = new Entidade();
+                temp.setCodpostal(codPostal);
+                temp.setEmail(email);
+                temp.setIdEmpresa(empControl.findEmpresa(1));
+                temp.setNif(nif);
+                temp.setNivelpermissao(2);
+                temp.setNome(nomeCompleto);
+                temp.setNporta(nPorta);
+                temp.setPasswordp(password);
+                temp.setRua(rua);
+                temp.setTelefone(telefone);
+                temp.setUsername(username);
+
+                try {
+                    ec.create(temp);
+                    JOptionPane.showMessageDialog(null, "Conta criada!");
+                    SwitchPanel(1);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Erro ao criar conta!!");
+                }
             }
-        }
         
-        
+        } else JOptionPane.showMessageDialog(null, "Preencha todos os dados!");
         
     }
     
@@ -209,7 +228,7 @@ public class Login extends javax.swing.JFrame {
         criarContaNPorta = new javax.swing.JTextField();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        criarConta = new javax.swing.JButton();
         jLabel14 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
         criarContaEmail = new javax.swing.JTextField();
@@ -376,11 +395,16 @@ public class Login extends javax.swing.JFrame {
         jLabel13.setForeground(new java.awt.Color(102, 102, 102));
         jLabel13.setText("Código Postal:");
 
-        jButton1.setBackground(new java.awt.Color(255, 255, 255));
-        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(102, 102, 102));
-        jButton1.setText("Criar conta");
-        jButton1.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        criarConta.setBackground(new java.awt.Color(255, 255, 255));
+        criarConta.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        criarConta.setForeground(new java.awt.Color(102, 102, 102));
+        criarConta.setText("Criar conta");
+        criarConta.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        criarConta.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                criarContaActionPerformed(evt);
+            }
+        });
 
         jLabel14.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel14.setForeground(new java.awt.Color(102, 204, 255));
@@ -484,7 +508,7 @@ public class Login extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(criarConta, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel4Layout.createSequentialGroup()
                                 .addGap(50, 50, 50)
                                 .addComponent(jLabel14)))
@@ -543,7 +567,7 @@ public class Login extends javax.swing.JFrame {
                 .addGap(5, 5, 5)
                 .addComponent(criarContaPassword2, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(54, 54, 54)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(criarConta, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(8, 8, 8)
                 .addComponent(jLabel14)
                 .addGap(29, 29, 29))
@@ -609,6 +633,11 @@ public class Login extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_criarContaContactoActionPerformed
 
+    private void criarContaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_criarContaActionPerformed
+        // TODO add your handling code here:
+        criarConta();
+    }//GEN-LAST:event_criarContaActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -651,6 +680,7 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JLayeredPane LayeredPanel;
     private javax.swing.JButton LoginButton;
     private javax.swing.JPanel LoginPanel;
+    private javax.swing.JButton criarConta;
     private javax.swing.JLabel criarContaButton;
     private javax.swing.JComboBox<String> criarContaCodPostalComboBox;
     private javax.swing.JTextField criarContaContacto;
@@ -662,7 +692,6 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JPasswordField criarContaPassword2;
     private javax.swing.JTextField criarContaRua;
     private javax.swing.JTextField criarContaUsername;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

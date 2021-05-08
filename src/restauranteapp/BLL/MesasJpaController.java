@@ -17,7 +17,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import restauranteapp.BLL.exceptions.NonexistentEntityException;
-import restauranteapp.BLL.exceptions.PreexistingEntityException;
 import restauranteapp.DAL.Mesas;
 
 /**
@@ -35,7 +34,7 @@ public class MesasJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Mesas mesas) throws PreexistingEntityException, Exception {
+    public void create(Mesas mesas) {
         if (mesas.getReservaList() == null) {
             mesas.setReservaList(new ArrayList<Reserva>());
         }
@@ -55,11 +54,6 @@ public class MesasJpaController implements Serializable {
                 reservaListReserva = em.merge(reservaListReserva);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findMesas(mesas.getIdMesa()) != null) {
-                throw new PreexistingEntityException("Mesas " + mesas + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

@@ -41,6 +41,8 @@ public class Estado implements Serializable {
     private List<Encomenda> encomendaList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idEstado")
     private List<Pedido> pedidoList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idEstado")
+    private List<Reserva> reservaList;
 
     public Estado() {
     }
@@ -84,6 +86,14 @@ public class Estado implements Serializable {
 
     public void setPedidoList(List<Pedido> pedidoList) {
         this.pedidoList = pedidoList;
+    }
+
+    public List<Reserva> getReservaList() {
+        return reservaList;
+    }
+
+    public void setReservaList(List<Reserva> reservaList) {
+        this.reservaList = reservaList;
     }
 
     @Override

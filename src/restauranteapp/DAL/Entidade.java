@@ -11,6 +11,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -43,6 +45,7 @@ public class Entidade implements Serializable {
     @Id
     @Basic(optional = false)
     @Column(name = "ID_ENTIDADE")
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="SEQ_NAME")
     private Integer idEntidade;
     @Basic(optional = false)
     @Column(name = "USERNAME")

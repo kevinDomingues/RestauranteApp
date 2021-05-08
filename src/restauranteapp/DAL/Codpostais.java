@@ -118,7 +118,7 @@ public class Codpostais implements Serializable {
 
     @Override
     public String toString() {
-        return this.codpostal + ", " + this.localidade;
+        return this.codpostal;
     }
     
 }

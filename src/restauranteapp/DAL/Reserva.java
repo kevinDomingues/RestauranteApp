@@ -51,6 +51,9 @@ public class Reserva implements Serializable {
     @JoinColumn(name = "ID_ENTIDADE", referencedColumnName = "ID_ENTIDADE")
     @ManyToOne(optional = false)
     private Entidade idEntidade;
+    @JoinColumn(name = "ID_ESTADO", referencedColumnName = "ID_ESTADO")
+    @ManyToOne(optional = false)
+    private Estado idEstado;
 
     public Reserva() {
     }
@@ -103,6 +106,14 @@ public class Reserva implements Serializable {
 
     public void setIdEntidade(Entidade idEntidade) {
         this.idEntidade = idEntidade;
+    }
+
+    public Estado getIdEstado() {
+        return idEstado;
+    }
+
+    public void setIdEstado(Estado idEstado) {
+        this.idEstado = idEstado;
     }
 
     @Override

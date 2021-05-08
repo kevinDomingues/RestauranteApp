@@ -39,8 +39,8 @@ public class LinhapedidoJpaController implements Serializable {
         if (linhapedido.getLinhapedidoPK() == null) {
             linhapedido.setLinhapedidoPK(new LinhapedidoPK());
         }
-        linhapedido.getLinhapedidoPK().setCodpedido(linhapedido.getPedido().getCodpedido());
         linhapedido.getLinhapedidoPK().setIdProduto(linhapedido.getProdutoementa().getIdProduto());
+        linhapedido.getLinhapedidoPK().setCodpedido(linhapedido.getPedido().getCodpedido());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -78,8 +78,8 @@ public class LinhapedidoJpaController implements Serializable {
     }
 
     public void edit(Linhapedido linhapedido) throws NonexistentEntityException, Exception {
-        linhapedido.getLinhapedidoPK().setCodpedido(linhapedido.getPedido().getCodpedido());
         linhapedido.getLinhapedidoPK().setIdProduto(linhapedido.getProdutoementa().getIdProduto());
+        linhapedido.getLinhapedidoPK().setCodpedido(linhapedido.getPedido().getCodpedido());
         EntityManager em = null;
         try {
             em = getEntityManager();

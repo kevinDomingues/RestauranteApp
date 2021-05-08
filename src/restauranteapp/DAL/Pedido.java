@@ -12,6 +12,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -39,6 +41,7 @@ public class Pedido implements Serializable {
     @Id
     @Basic(optional = false)
     @Column(name = "CODPEDIDO")
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer codpedido;
     @Basic(optional = false)
     @Column(name = "DATAHORA")

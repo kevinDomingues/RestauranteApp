@@ -20,6 +20,7 @@ import restauranteapp.BLL.exceptions.NonexistentEntityException;
 import restauranteapp.BLL.exceptions.PreexistingEntityException;
 import restauranteapp.DAL.Estado;
 import restauranteapp.DAL.Pedido;
+import restauranteapp.DAL.Reserva;
 
 /**
  *
@@ -43,6 +44,9 @@ public class EstadoJpaController implements Serializable {
         if (estado.getPedidoList() == null) {
             estado.setPedidoList(new ArrayList<Pedido>());
         }
+        if (estado.getReservaList() == null) {
+            estado.setReservaList(new ArrayList<Reserva>());
+        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -59,6 +63,12 @@ public class EstadoJpaController implements Serializable {
                 attachedPedidoList.add(pedidoListPedidoToAttach);
             }
             estado.setPedidoList(attachedPedidoList);
+            List<Reserva> attachedReservaList = new ArrayList<Reserva>();
+            for (Reserva reservaListReservaToAttach : estado.getReservaList()) {
+                reservaListReservaToAttach = em.getReference(reservaListReservaToAttach.getClass(), reservaListReservaToAttach.getIdReserva());
+                attachedReservaList.add(reservaListReservaToAttach);
+            }
+            estado.setReservaList(attachedReservaList);
             em.persist(estado);
             for (Encomenda encomendaListEncomenda : estado.getEncomendaList()) {
                 Estado oldIdEstadoOfEncomendaListEncomenda = encomendaListEncomenda.getIdEstado();
@@ -76,6 +86,15 @@ public class EstadoJpaController implements Serializable {
                 if (oldIdEstadoOfPedidoListPedido != null) {
                     oldIdEstadoOfPedidoListPedido.getPedidoList().remove(pedidoListPedido);
                     oldIdEstadoOfPedidoListPedido = em.merge(oldIdEstadoOfPedidoListPedido);
+                }
+            }
+            for (Reserva reservaListReserva : estado.getReservaList()) {
+                Estado oldIdEstadoOfReservaListReserva = reservaListReserva.getIdEstado();
+                reservaListReserva.setIdEstado(estado);
+                reservaListReserva = em.merge(reservaListReserva);
+                if (oldIdEstadoOfReservaListReserva != null) {
+                    oldIdEstadoOfReservaListReserva.getReservaList().remove(reservaListReserva);
+                    oldIdEstadoOfReservaListReserva = em.merge(oldIdEstadoOfReservaListReserva);
                 }
             }
             em.getTransaction().commit();
@@ -101,6 +120,8 @@ public class EstadoJpaController implements Serializable {
             List<Encomenda> encomendaListNew = estado.getEncomendaList();
             List<Pedido> pedidoListOld = persistentEstado.getPedidoList();
             List<Pedido> pedidoListNew = estado.getPedidoList();
+            List<Reserva> reservaListOld = persistentEstado.getReservaList();
+            List<Reserva> reservaListNew = estado.getReservaList();
             List<String> illegalOrphanMessages = null;
             for (Encomenda encomendaListOldEncomenda : encomendaListOld) {
                 if (!encomendaListNew.contains(encomendaListOldEncomenda)) {
@@ -116,6 +137,14 @@ public class EstadoJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain Pedido " + pedidoListOldPedido + " since its idEstado field is not nullable.");
+                }
+            }
+            for (Reserva reservaListOldReserva : reservaListOld) {
+                if (!reservaListNew.contains(reservaListOldReserva)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain Reserva " + reservaListOldReserva + " since its idEstado field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -135,6 +164,13 @@ public class EstadoJpaController implements Serializable {
             }
             pedidoListNew = attachedPedidoListNew;
             estado.setPedidoList(pedidoListNew);
+            List<Reserva> attachedReservaListNew = new ArrayList<Reserva>();
+            for (Reserva reservaListNewReservaToAttach : reservaListNew) {
+                reservaListNewReservaToAttach = em.getReference(reservaListNewReservaToAttach.getClass(), reservaListNewReservaToAttach.getIdReserva());
+                attachedReservaListNew.add(reservaListNewReservaToAttach);
+            }
+            reservaListNew = attachedReservaListNew;
+            estado.setReservaList(reservaListNew);
             estado = em.merge(estado);
             for (Encomenda encomendaListNewEncomenda : encomendaListNew) {
                 if (!encomendaListOld.contains(encomendaListNewEncomenda)) {
@@ -155,6 +191,17 @@ public class EstadoJpaController implements Serializable {
                     if (oldIdEstadoOfPedidoListNewPedido != null && !oldIdEstadoOfPedidoListNewPedido.equals(estado)) {
                         oldIdEstadoOfPedidoListNewPedido.getPedidoList().remove(pedidoListNewPedido);
                         oldIdEstadoOfPedidoListNewPedido = em.merge(oldIdEstadoOfPedidoListNewPedido);
+                    }
+                }
+            }
+            for (Reserva reservaListNewReserva : reservaListNew) {
+                if (!reservaListOld.contains(reservaListNewReserva)) {
+                    Estado oldIdEstadoOfReservaListNewReserva = reservaListNewReserva.getIdEstado();
+                    reservaListNewReserva.setIdEstado(estado);
+                    reservaListNewReserva = em.merge(reservaListNewReserva);
+                    if (oldIdEstadoOfReservaListNewReserva != null && !oldIdEstadoOfReservaListNewReserva.equals(estado)) {
+                        oldIdEstadoOfReservaListNewReserva.getReservaList().remove(reservaListNewReserva);
+                        oldIdEstadoOfReservaListNewReserva = em.merge(oldIdEstadoOfReservaListNewReserva);
                     }
                 }
             }
@@ -201,6 +248,13 @@ public class EstadoJpaController implements Serializable {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Estado (" + estado + ") cannot be destroyed since the Pedido " + pedidoListOrphanCheckPedido + " in its pedidoList field has a non-nullable idEstado field.");
+            }
+            List<Reserva> reservaListOrphanCheck = estado.getReservaList();
+            for (Reserva reservaListOrphanCheckReserva : reservaListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Estado (" + estado + ") cannot be destroyed since the Reserva " + reservaListOrphanCheckReserva + " in its reservaList field has a non-nullable idEstado field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

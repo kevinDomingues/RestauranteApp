@@ -19,7 +19,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import restauranteapp.BLL.exceptions.IllegalOrphanException;
 import restauranteapp.BLL.exceptions.NonexistentEntityException;
-import restauranteapp.BLL.exceptions.PreexistingEntityException;
 import restauranteapp.DAL.Entidade;
 import restauranteapp.DAL.Reserva;
 
@@ -38,7 +37,7 @@ public class EntidadeJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Entidade entidade) throws PreexistingEntityException, Exception {
+    public void create(Entidade entidade) {
         if (entidade.getPedidoList() == null) {
             entidade.setPedidoList(new ArrayList<Pedido>());
         }
@@ -99,11 +98,6 @@ public class EntidadeJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findEntidade(entidade.getIdEntidade()) != null) {
-                throw new PreexistingEntityException("Entidade " + entidade + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

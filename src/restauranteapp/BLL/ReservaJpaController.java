@@ -11,6 +11,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import restauranteapp.DAL.Entidade;
+import restauranteapp.DAL.Estado;
 import restauranteapp.DAL.Mesas;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +49,11 @@ public class ReservaJpaController implements Serializable {
                 idEntidade = em.getReference(idEntidade.getClass(), idEntidade.getIdEntidade());
                 reserva.setIdEntidade(idEntidade);
             }
+            Estado idEstado = reserva.getIdEstado();
+            if (idEstado != null) {
+                idEstado = em.getReference(idEstado.getClass(), idEstado.getIdEstado());
+                reserva.setIdEstado(idEstado);
+            }
             List<Mesas> attachedMesasList = new ArrayList<Mesas>();
             for (Mesas mesasListMesasToAttach : reserva.getMesasList()) {
                 mesasListMesasToAttach = em.getReference(mesasListMesasToAttach.getClass(), mesasListMesasToAttach.getIdMesa());
@@ -58,6 +64,10 @@ public class ReservaJpaController implements Serializable {
             if (idEntidade != null) {
                 idEntidade.getReservaList().add(reserva);
                 idEntidade = em.merge(idEntidade);
+            }
+            if (idEstado != null) {
+                idEstado.getReservaList().add(reserva);
+                idEstado = em.merge(idEstado);
             }
             for (Mesas mesasListMesas : reserva.getMesasList()) {
                 mesasListMesas.getReservaList().add(reserva);
@@ -84,11 +94,17 @@ public class ReservaJpaController implements Serializable {
             Reserva persistentReserva = em.find(Reserva.class, reserva.getIdReserva());
             Entidade idEntidadeOld = persistentReserva.getIdEntidade();
             Entidade idEntidadeNew = reserva.getIdEntidade();
+            Estado idEstadoOld = persistentReserva.getIdEstado();
+            Estado idEstadoNew = reserva.getIdEstado();
             List<Mesas> mesasListOld = persistentReserva.getMesasList();
             List<Mesas> mesasListNew = reserva.getMesasList();
             if (idEntidadeNew != null) {
                 idEntidadeNew = em.getReference(idEntidadeNew.getClass(), idEntidadeNew.getIdEntidade());
                 reserva.setIdEntidade(idEntidadeNew);
+            }
+            if (idEstadoNew != null) {
+                idEstadoNew = em.getReference(idEstadoNew.getClass(), idEstadoNew.getIdEstado());
+                reserva.setIdEstado(idEstadoNew);
             }
             List<Mesas> attachedMesasListNew = new ArrayList<Mesas>();
             for (Mesas mesasListNewMesasToAttach : mesasListNew) {
@@ -105,6 +121,14 @@ public class ReservaJpaController implements Serializable {
             if (idEntidadeNew != null && !idEntidadeNew.equals(idEntidadeOld)) {
                 idEntidadeNew.getReservaList().add(reserva);
                 idEntidadeNew = em.merge(idEntidadeNew);
+            }
+            if (idEstadoOld != null && !idEstadoOld.equals(idEstadoNew)) {
+                idEstadoOld.getReservaList().remove(reserva);
+                idEstadoOld = em.merge(idEstadoOld);
+            }
+            if (idEstadoNew != null && !idEstadoNew.equals(idEstadoOld)) {
+                idEstadoNew.getReservaList().add(reserva);
+                idEstadoNew = em.merge(idEstadoNew);
             }
             for (Mesas mesasListOldMesas : mesasListOld) {
                 if (!mesasListNew.contains(mesasListOldMesas)) {
@@ -151,6 +175,11 @@ public class ReservaJpaController implements Serializable {
             if (idEntidade != null) {
                 idEntidade.getReservaList().remove(reserva);
                 idEntidade = em.merge(idEntidade);
+            }
+            Estado idEstado = reserva.getIdEstado();
+            if (idEstado != null) {
+                idEstado.getReservaList().remove(reserva);
+                idEstado = em.merge(idEstado);
             }
             List<Mesas> mesasList = reserva.getMesasList();
             for (Mesas mesasListMesas : mesasList) {
