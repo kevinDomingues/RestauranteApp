@@ -15,6 +15,7 @@ import restauranteapp.BLL.CodpostaisJpaController;
 import restauranteapp.BLL.EmpresaJpaController;
 import restauranteapp.BLL.EntidadeJpaController;
 import restauranteapp.DAL.Codpostais;
+import restauranteapp.DAL.Empresa;
 import restauranteapp.DAL.Entidade;
 
 /**
@@ -37,7 +38,7 @@ public class Login extends javax.swing.JFrame {
         populateCodPostais();
     }
        
-    public void validateLogin(String username, String password){
+    private void validateLogin(String username, String password){
         EntidadeJpaController ec = new EntidadeJpaController(this.em);
         
         List<Entidade> users = ec.findEntidadeEntities();
@@ -132,7 +133,7 @@ public class Login extends javax.swing.JFrame {
     
     }
     
-    public boolean NoEmptyFields(){
+    private boolean NoEmptyFields(){
         return !this.criarContaUsername.getText().isEmpty() && !this.criarContaNome.getText().isEmpty() 
                 && !this.criarContaEmail.getText().isEmpty() && !this.criarContaContacto.getText().isEmpty()
                 && !this.criarContaNif.getText().isEmpty() && !this.criarContaRua.getText().isEmpty()
@@ -149,7 +150,7 @@ public class Login extends javax.swing.JFrame {
         }
     }
     
-    public void criarConta(){
+    private void criarConta(){
         CodpostaisJpaController postalControl = new CodpostaisJpaController(this.em);
         EmpresaJpaController empControl = new EmpresaJpaController(this.em);
         EntidadeJpaController ec = new EntidadeJpaController(this.em);
@@ -203,12 +204,12 @@ public class Login extends javax.swing.JFrame {
         
     }
     
-    public void clearPanels() {
+    private void clearPanels() {
         this.LoginPanel.setVisible(false);
         this.CriarContaPanel.setVisible(false);
     }
     
-    public void SwitchPanel(int panelNumber) {
+    private void SwitchPanel(int panelNumber) {
         clearPanels();
         switch(panelNumber){
             case 1: this.LoginPanel.setVisible(true); break;//this.LayeredPanel.moveToFront(this.LoginPanel);
@@ -621,6 +622,15 @@ public class Login extends javax.swing.JFrame {
 
     private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
         // TODO add your handling code here:
+        
+        //Retirar os comentários em baixo caso seja necessário utilizar uma conta teste 
+        
+//        Entidade teste = new Entidade();
+//        teste.setNome("Entidade teste");
+//        Empresa temp = new Empresa(1, "Restaurante teste LDA", 1234);
+//        teste.setIdEmpresa(temp);
+//        new Menu(teste).setVisible(true);
+        
         String username = this.jUsernameField.getText();
         String password = this.jPasswordField.getText();
 

@@ -34,6 +34,10 @@ public class Menu extends javax.swing.JFrame {
         this.Empresa.setText(temp.getIdEmpresa().getNome());
         this.jPanel5.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
         this.jPanel6.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
+        this.jPanel4.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
+        this.jPanel7.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
+        this.jPanel9.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
+        this.jPanel8.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
     }
 
     public void setButtonColor(javax.swing.JPanel panel){
@@ -45,6 +49,7 @@ public class Menu extends javax.swing.JFrame {
         else if(panel.equals(this.PedidosButton) && !this.verPedidos.isVisible()) panel.setBackground(new Color(45,136,195));
         else if(panel.equals(this.ProdutosButton) && !this.verProdutos.isVisible()) panel.setBackground(new Color(45,136,195));
         else if(panel.equals(this.EncomendasButton) && !this.verEncomendas.isVisible()) panel.setBackground(new Color(45,136,195));
+        else if(panel.equals(this.DesconectarButton)) panel.setBackground(new Color(45,136,195));
     }
     
     public void resetAllButtonColors(){
@@ -94,6 +99,8 @@ public class Menu extends javax.swing.JFrame {
         ProdutosButton = new javax.swing.JPanel();
         ProdutosButtonLabel = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
+        DesconectarButton = new javax.swing.JPanel();
+        Desconectar = new javax.swing.JLabel();
         jPanel26 = new javax.swing.JPanel();
         Username = new javax.swing.JLabel();
         Empresa = new javax.swing.JLabel();
@@ -103,7 +110,6 @@ public class Menu extends javax.swing.JFrame {
         verProdutos = new javax.swing.JPanel();
         jTextField4 = new javax.swing.JTextField();
         jPanel53 = new javax.swing.JPanel();
-        jPanel54 = new javax.swing.JPanel();
         jScrollPane8 = new javax.swing.JScrollPane();
         jTextArea4 = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -188,7 +194,12 @@ public class Menu extends javax.swing.JFrame {
         jPanel51 = new javax.swing.JPanel();
         jLabel44 = new javax.swing.JLabel();
         verPedidos = new javax.swing.JPanel();
+        jPanel4 = new RoundedPanel(50, new Color(255,235,44));
         jLabel2 = new javax.swing.JLabel();
+        jPanel7 = new RoundedPanel(25, new Color(255,255,255));
+        jPanel9 = new RoundedPanel(50, new Color(60,147,232));
+        jLabel3 = new javax.swing.JLabel();
+        jPanel8 = new RoundedPanel(25, new Color(255,255,255));
         verEncomendas = new javax.swing.JPanel();
         jTextField5 = new javax.swing.JTextField();
         jPanel55 = new javax.swing.JPanel();
@@ -351,6 +362,39 @@ public class Menu extends javax.swing.JFrame {
         });
         jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 40, -1, -1));
 
+        DesconectarButton.setBackground(new java.awt.Color(45, 136, 195));
+        DesconectarButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                DesconectarButtonMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                DesconectarButtonMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                DesconectarButtonMouseExited(evt);
+            }
+        });
+        DesconectarButton.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        Desconectar.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        Desconectar.setForeground(new java.awt.Color(255, 255, 255));
+        Desconectar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        Desconectar.setText("Desconectar");
+        Desconectar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                DesconectarMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                DesconectarMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                DesconectarMouseExited(evt);
+            }
+        });
+        DesconectarButton.add(Desconectar, new org.netbeans.lib.awtextra.AbsoluteConstraints(-2, 10, 310, -1));
+
+        jPanel1.add(DesconectarButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 630, 310, 40));
+
         jPanel26.setBackground(new java.awt.Color(41, 128, 185));
         jPanel26.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
 
@@ -368,24 +412,20 @@ public class Menu extends javax.swing.JFrame {
         jPanel26.setLayout(jPanel26Layout);
         jPanel26Layout.setHorizontalGroup(
             jPanel26Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel26Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel26Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(Username, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
-                    .addComponent(Empresa, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE))
-                .addContainerGap())
+            .addComponent(Empresa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(Username, javax.swing.GroupLayout.DEFAULT_SIZE, 308, Short.MAX_VALUE)
         );
         jPanel26Layout.setVerticalGroup(
             jPanel26Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel26Layout.createSequentialGroup()
-                .addContainerGap(86, Short.MAX_VALUE)
+                .addContainerGap(97, Short.MAX_VALUE)
                 .addComponent(Username)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(Empresa)
-                .addGap(17, 17, 17))
+                .addContainerGap())
         );
 
-        jPanel1.add(jPanel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 510, 290, 150));
+        jPanel1.add(jPanel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 460, 310, 150));
 
         jPanel52.setForeground(new java.awt.Color(255, 255, 255));
 
@@ -410,7 +450,7 @@ public class Menu extends javax.swing.JFrame {
         verProdutos.setPreferredSize(new java.awt.Dimension(1093, 645));
         verProdutos.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jTextField4.setText("jTextField1");
+        jTextField4.setText("Pesquisar");
         verProdutos.add(jTextField4, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 100, 220, -1));
 
         jPanel53.setBackground(new java.awt.Color(255, 255, 255));
@@ -428,25 +468,6 @@ public class Menu extends javax.swing.JFrame {
         );
 
         verProdutos.add(jPanel53, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 100, 20, 20));
-
-        jPanel54.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jPanel54MouseClicked(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel54Layout = new javax.swing.GroupLayout(jPanel54);
-        jPanel54.setLayout(jPanel54Layout);
-        jPanel54Layout.setHorizontalGroup(
-            jPanel54Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 100, Short.MAX_VALUE)
-        );
-        jPanel54Layout.setVerticalGroup(
-            jPanel54Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 30, Short.MAX_VALUE)
-        );
-
-        verProdutos.add(jPanel54, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 500, -1, 30));
 
         jTextArea4.setColumns(20);
         jTextArea4.setRows(5);
@@ -1751,14 +1772,81 @@ public class Menu extends javax.swing.JFrame {
         verPedidos.setPreferredSize(new java.awt.Dimension(1093, 645));
         verPedidos.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel2.setText("Pedidos");
-        verPedidos.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(391, 274, 65, -1));
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel2.setText("Pedido 1");
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addContainerGap(51, Short.MAX_VALUE)
+                .addComponent(jLabel2)
+                .addGap(47, 47, 47))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel2)
+                .addContainerGap(9, Short.MAX_VALUE))
+        );
+
+        verPedidos.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 60, 170, 40));
+
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 170, Short.MAX_VALUE)
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 250, Short.MAX_VALUE)
+        );
+
+        verPedidos.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 80, 170, 250));
+
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel3.setText("Pedido 2");
+
+        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+        jPanel9.setLayout(jPanel9Layout);
+        jPanel9Layout.setHorizontalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
+                .addContainerGap(51, Short.MAX_VALUE)
+                .addComponent(jLabel3)
+                .addGap(47, 47, 47))
+        );
+        jPanel9Layout.setVerticalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel3)
+                .addContainerGap(9, Short.MAX_VALUE))
+        );
+
+        verPedidos.add(jPanel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 60, 170, -1));
+
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        jPanel8.setLayout(jPanel8Layout);
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 170, Short.MAX_VALUE)
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 250, Short.MAX_VALUE)
+        );
+
+        verPedidos.add(jPanel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 80, 170, -1));
 
         verEncomendas.setMinimumSize(new java.awt.Dimension(1093, 645));
         verEncomendas.setPreferredSize(new java.awt.Dimension(1093, 645));
         verEncomendas.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jTextField5.setText("jTextField1");
+        jTextField5.setText("Pesquisar");
         verEncomendas.add(jTextField5, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 100, 220, -1));
 
         jPanel55.setBackground(new java.awt.Color(255, 255, 255));
@@ -1785,7 +1873,7 @@ public class Menu extends javax.swing.JFrame {
                 {null}
             },
             new String [] {
-                "Produto"
+                "Encomendas"
             }
         ));
         jScrollPane1.setViewportView(jTableEncomendas);
@@ -2169,10 +2257,6 @@ public class Menu extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jLabel44MouseClicked
 
-    private void jPanel54MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel54MouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jPanel54MouseClicked
-
     private void MesasButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_MesasButtonMouseEntered
         // TODO add your handling code here:
         setButtonColor(this.MesasButton);
@@ -2248,6 +2332,38 @@ public class Menu extends javax.swing.JFrame {
         resetButtonColor(this.PedidosButton);
     }//GEN-LAST:event_PedidosButtonLabelMouseExited
 
+    private void DesconectarButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DesconectarButtonMouseClicked
+        // TODO add your handling code here:
+        new Login().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_DesconectarButtonMouseClicked
+
+    private void DesconectarButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DesconectarButtonMouseEntered
+        // TODO add your handling code here:
+        setButtonColor(this.DesconectarButton);
+    }//GEN-LAST:event_DesconectarButtonMouseEntered
+
+    private void DesconectarButtonMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DesconectarButtonMouseExited
+        // TODO add your handling code here:
+        resetButtonColor(this.DesconectarButton);
+    }//GEN-LAST:event_DesconectarButtonMouseExited
+
+    private void DesconectarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DesconectarMouseClicked
+        // TODO add your handling code here:
+        new Login().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_DesconectarMouseClicked
+
+    private void DesconectarMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DesconectarMouseEntered
+        // TODO add your handling code here:
+        setButtonColor(this.DesconectarButton);
+    }//GEN-LAST:event_DesconectarMouseEntered
+
+    private void DesconectarMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DesconectarMouseExited
+        // TODO add your handling code here:
+        resetButtonColor(this.DesconectarButton);
+    }//GEN-LAST:event_DesconectarMouseExited
+
     /**
      * @param args the command line arguments
      */
@@ -2284,6 +2400,8 @@ public class Menu extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel Desconectar;
+    private javax.swing.JPanel DesconectarButton;
     private javax.swing.JLabel Empresa;
     private javax.swing.JPanel EncomendasButton;
     private javax.swing.JLabel EncomendasButtonLabel;
@@ -2317,6 +2435,7 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel29;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel32;
@@ -2369,6 +2488,7 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel37;
     private javax.swing.JPanel jPanel38;
     private javax.swing.JPanel jPanel39;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel40;
     private javax.swing.JPanel jPanel41;
     private javax.swing.JPanel jPanel42;
@@ -2384,9 +2504,11 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel51;
     private javax.swing.JPanel jPanel52;
     private javax.swing.JPanel jPanel53;
-    private javax.swing.JPanel jPanel54;
     private javax.swing.JPanel jPanel55;
     private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane10;
     private javax.swing.JScrollPane jScrollPane2;
@@ -2445,15 +2567,13 @@ class RoundedPanel extends JPanel
             Graphics2D graphics = (Graphics2D) g;
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            //Draws the rounded panel with borders.
             if (backgroundColor != null) {
                 graphics.setColor(backgroundColor);
             } else {
                 graphics.setColor(getBackground());
             }
-            graphics.fillRoundRect(0, 0, width-1, height-1, arcs.width, arcs.height); //paint background
+            graphics.fillRoundRect(0, 0, width-1, height-1, arcs.width, arcs.height);
             graphics.setColor(getForeground());
-           // graphics.drawRoundRect(0, 0, width-1, height-1, arcs.width, arcs.height); //paint border
         }
     }
 

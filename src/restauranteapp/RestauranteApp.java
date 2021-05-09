@@ -19,20 +19,13 @@ public class RestauranteApp {
     /**
      * @param args the command line arguments
      */
-    
-    private static final EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("RestauranteAppPU");
- //   private static final EntityManager em = entityManagerFactory.createEntityManager();
-    
+        
     public static void main(String[] args) throws UnsupportedLookAndFeelException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         // TODO code application logic here
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         
-       // Entidade entidade1 = em.find(Entidade.class, 1);
-       
-       // System.out.println("nome do cliente: "+entidade1.getNome());
-        
-       Login login = new Login();
-       login.setVisible(true); 
+        Login login = new Login();
+        login.setVisible(true); 
     }
     
 }
