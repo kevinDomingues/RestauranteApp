@@ -30,7 +30,8 @@ public class Login extends javax.swing.JFrame {
      */
     public Login() {
         this.em = Persistence.createEntityManagerFactory("RestauranteAppPU");
-        initComponents();
+      //  this.setUndecorated(true);
+        initComponents();        
         this.setLocationRelativeTo(null);
         SwitchPanel(1);
         populateCodPostais();
@@ -263,7 +264,7 @@ public class Login extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jPanel1.setBackground(new java.awt.Color(51, 204, 255));
+        jPanel1.setBackground(new java.awt.Color(41, 128, 185));
         jPanel1.setPreferredSize(new java.awt.Dimension(250, 530));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
         getContentPane().add(jPanel1, java.awt.BorderLayout.LINE_START);
