@@ -8,6 +8,7 @@ package restauranteapp;
 import UI.Login;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import com.formdev.flatlaf.FlatLightLaf;
 import javax.persistence.Persistence;
 import javax.persistence.EntityManagerFactory;
 /**
@@ -22,7 +23,13 @@ public class RestauranteApp {
         
     public static void main(String[] args) throws UnsupportedLookAndFeelException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         // TODO code application logic here
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        
+        try {
+            UIManager.setLookAndFeel( new FlatLightLaf() );
+        } catch( Exception ex ) {
+            System.err.println( "Failed to initialize LaF" );
+        }
         
         Login login = new Login();
         login.setVisible(true); 
