@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.swing.JOptionPane;
+import restauranteapp.BLL.LoginJpaController;
 import restauranteapp.BLL.CodpostaisJpaController;
 import restauranteapp.BLL.EmpresaJpaController;
 import restauranteapp.BLL.EntidadeJpaController;
@@ -24,47 +25,25 @@ import restauranteapp.DAL.Entidade;
  */
 public class Login extends javax.swing.JFrame {
 
-    EntityManagerFactory em;
+    private EntityManagerFactory em;
+    private LoginJpaController lc;
     
     /**
      * Creates new form Login2
      */
     public Login() {
         this.em = Persistence.createEntityManagerFactory("RestauranteAppPU");
+        this.lc = new LoginJpaController();
       //  this.setUndecorated(true);
         initComponents();        
         this.setLocationRelativeTo(null);
         SwitchPanel(1);
         populateCodPostais();
     }
-       
-    private void validateLogin(String username, String password){
-        EntidadeJpaController ec = new EntidadeJpaController(this.em);
-        
-        List<Entidade> users = ec.findEntidadeEntities();
-        Entidade temp = new Entidade();
-        boolean loginStatus = false;
-        
-        for(Entidade e : users){
-            if(e.getUsername().equals(username) && e.getPasswordp().equals(password)){
-                if(e.getNivelpermissao()==2){
-                    temp = e;
-                    loginStatus = true;
-                } else JOptionPane.showMessageDialog(null, "Não tem permissão para entrar!");
-            }
-        }
-        
-        if(loginStatus) {
-            new Menu(temp).setVisible(true);
-            this.dispose();
-        } 
-        
-    }
     
     private void populateCodPostais(){
-        CodpostaisJpaController postalControl = new CodpostaisJpaController(this.em);
         
-        List<Codpostais> cods = postalControl.findCodpostaisEntities();
+        List<Codpostais> cods = lc.populateCodPostais();
         
         for(Codpostais e : cods){
             this.criarContaCodPostalComboBox.addItem(e.toString());
@@ -634,7 +613,7 @@ public class Login extends javax.swing.JFrame {
         String username = this.jUsernameField.getText();
         String password = this.jPasswordField.getText();
 
-        validateLogin(username, password);
+        if(lc.validateLogin(username, password)) this.dispose();
     }//GEN-LAST:event_LoginButtonActionPerformed
 
     private void criarContaUsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_criarContaUsernameActionPerformed
