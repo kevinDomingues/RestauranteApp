@@ -15,10 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
+import javax.swing.table.DefaultTableModel;
 import org.netbeans.lib.awtextra.AbsoluteLayout;
 import restauranteapp.BLL.MenuJpaController;
+import restauranteapp.DAL.Encomenda;
 import restauranteapp.DAL.Entidade;
 import restauranteapp.DAL.Mesas;
+import restauranteapp.DAL.Produtoementa;
 
 /**
  *
@@ -104,6 +107,30 @@ public class Menu extends javax.swing.JFrame {
         }
         jPanel2.validate();
         jPanel2.repaint();
+    }
+    
+    private void populateProdutos(){
+        List<Produtoementa> produtosEmenta = this.mc.getProdutosEmenta();
+        DefaultTableModel tableProdutos = (DefaultTableModel) this.jTableProdutos.getModel();
+        System.out.println("Teste");
+        //tableProdutos.
+        
+        
+        for(Produtoementa e : produtosEmenta){
+            tableProdutos.insertRow(0, new Object[] { e.getNome() });
+        }    
+    }
+    
+    private void populateEncomendas(){
+        List<Encomenda> encomendas = this.mc.getEncomendas();
+        DefaultTableModel tableProdutos = (DefaultTableModel) this.jTableEncomendas.getModel();
+        System.out.println("Teste");
+        //tableProdutos.
+        
+        
+        for(Encomenda e : encomendas){
+            tableProdutos.insertRow(0, new Object[] { e.getDescricao() });
+        }  
     }
     
     /**
@@ -766,6 +793,7 @@ public class Menu extends javax.swing.JFrame {
         SwitchPanel(3);
         resetAllButtonColors();
         setButtonColor(this.ProdutosButton);
+        populateProdutos();
     }//GEN-LAST:event_ProdutosButtonMouseClicked
 
     private void EncomendasButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EncomendasButtonMouseClicked
@@ -773,6 +801,7 @@ public class Menu extends javax.swing.JFrame {
         SwitchPanel(4);
         resetAllButtonColors();
         setButtonColor(this.EncomendasButton);
+        populateEncomendas();
     }//GEN-LAST:event_EncomendasButtonMouseClicked
 
     private void PedidosButtonLabelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_PedidosButtonLabelMouseEntered
@@ -799,6 +828,7 @@ public class Menu extends javax.swing.JFrame {
         SwitchPanel(3);
         resetAllButtonColors();
         setButtonColor(this.ProdutosButton);
+        populateProdutos();
     }//GEN-LAST:event_ProdutosButtonLabelMouseClicked
 
     private void EncomendasButtonLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EncomendasButtonLabelMouseClicked
@@ -806,6 +836,7 @@ public class Menu extends javax.swing.JFrame {
         SwitchPanel(4);
         resetAllButtonColors();
         setButtonColor(this.EncomendasButton);
+        populateEncomendas();
     }//GEN-LAST:event_EncomendasButtonLabelMouseClicked
 
     private void jLabel8MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel8MouseClicked

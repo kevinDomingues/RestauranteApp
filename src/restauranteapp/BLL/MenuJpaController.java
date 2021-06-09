@@ -54,6 +54,36 @@ public class MenuJpaController {
         }
     }   
     
+    public Pedido findPedidoId(int id){
+       EntityManager em2 = em.createEntityManager();
+       try {
+            CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
+            cq.select(cq.from(Pedido.class));
+          Query q =   em2.createNamedQuery("Pedido.findByCodpedido", Pedido.class);
+          q.setParameter("codpedido", id);
+           return (Pedido) q.getSingleResult();
+         }catch(NoResultException e){
+            return null;
+        } finally {
+            em2.close();
+        }
+    }
+    
+    public Mesas findMesaId(int id){
+       EntityManager em2 = em.createEntityManager();
+       try {
+            CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
+            cq.select(cq.from(Mesas.class));
+          Query q =   em2.createNamedQuery("Mesas.findByIdMesa", Mesas.class);
+          q.setParameter("idMesa", id);
+           return (Mesas) q.getSingleResult();
+         }catch(NoResultException e){
+            return null;
+        } finally {
+            em2.close();
+        }
+    }
+    
     public List<Mesas> getMesas(){   
         List<Mesas> mesas = mc.findMesasEntities();
         
@@ -70,7 +100,7 @@ public class MenuJpaController {
         return produtos;
     }
     
-    public List<Encomenda> getEncomenda(){      
+    public List<Encomenda> getEncomendas(){      
         List<Encomenda> encomendas = ec.findEncomendaEntities();
         return encomendas;
     }
