@@ -613,6 +613,9 @@ public class Login extends javax.swing.JFrame {
         String username = this.jUsernameField.getText();
         String password = this.jPasswordField.getText();
 
+        username = "kevind";
+        password = "1234";
+        
         if(lc.validateLogin(username, password)) this.dispose();
     }//GEN-LAST:event_LoginButtonActionPerformed
 

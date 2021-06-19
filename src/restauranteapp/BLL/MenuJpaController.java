@@ -18,6 +18,7 @@ import restauranteapp.DAL.Estado;
 import restauranteapp.DAL.Mesas;
 import restauranteapp.DAL.Pedido;
 import restauranteapp.DAL.Produtoementa;
+import restauranteapp.DAL.Stockproduto;
 
 /**
  *
@@ -30,6 +31,7 @@ public class MenuJpaController {
     private MesasJpaController mc;
     private ProdutoementaJpaController pec;
     private EncomendaJpaController ec;
+    private StockprodutoJpaController spc;
 
     public MenuJpaController() {
         this.em = Persistence.createEntityManagerFactory("RestauranteAppPU");
@@ -37,6 +39,7 @@ public class MenuJpaController {
         this.pc = new PedidoJpaController(em);
         this.pec = new ProdutoementaJpaController(em);
         this.ec = new EncomendaJpaController(em);
+        this.spc = new StockprodutoJpaController(em);
     }
     
     public Estado findEstadoId(int id){
@@ -62,6 +65,36 @@ public class MenuJpaController {
           Query q =   em2.createNamedQuery("Pedido.findByCodpedido", Pedido.class);
           q.setParameter("codpedido", id);
            return (Pedido) q.getSingleResult();
+         }catch(NoResultException e){
+            return null;
+        } finally {
+            em2.close();
+        }
+    }
+    
+    public Stockproduto findStockProdutoNome(String nome){
+       EntityManager em2 = em.createEntityManager();
+       try {
+            CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
+            cq.select(cq.from(Pedido.class));
+          Query q =   em2.createNamedQuery("Stockproduto.findByNome", Stockproduto.class);
+          q.setParameter("nome", nome);
+           return (Stockproduto) q.getSingleResult();
+         }catch(NoResultException e){
+            return null;
+        } finally {
+            em2.close();
+        }
+    }
+    
+    public List<Produtoementa> findProdutoByCategoria(String categoria){
+        EntityManager em2 = em.createEntityManager();
+       try {
+          CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
+          cq.select(cq.from(Produtoementa.class));
+          Query q =   em2.createNamedQuery("Produtoementa.findByCategoria", Produtoementa.class);
+          q.setParameter("categoria", categoria);
+           return q.getResultList();
          }catch(NoResultException e){
             return null;
         } finally {
@@ -97,6 +130,11 @@ public class MenuJpaController {
     
     public List<Produtoementa> getProdutosEmenta(){   
         List<Produtoementa> produtos = pec.findProdutoementaEntities();
+        return produtos;
+    }
+    
+    public List<Stockproduto> getStockProdutos(){
+        List<Stockproduto> produtos = spc.findStockprodutoEntities();
         return produtos;
     }
     

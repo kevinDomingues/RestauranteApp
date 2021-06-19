@@ -142,7 +142,7 @@ public class Pedido implements Serializable {
 
     @Override
     public String toString() {
-        return "restauranteapp.DAL.Pedido[ codpedido=" + codpedido + " ]";
+        return idEntidade.getNome()+"\n\n"+idEntidade.getRua()+"\n\n"+valortotal+"\n\n"+datahora.getHours()+":"+datahora.getMinutes()+"h";
     }
     
 }

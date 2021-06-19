@@ -151,7 +151,7 @@ public class Stockproduto implements Serializable {
 
     @Override
     public String toString() {
-        return "restauranteapp.DAL.Stockproduto[ idStockproduto=" + idStockproduto + " ]";
+        return "Nome produto: "+nome+"\n\nPreço sem Iva: "+preco+" , Taxa: "+taxa+"\n\nPreço com Iva: "+(preco+(preco*taxa))+"\n\nDescrição: "+descricao;
     }
     
 }

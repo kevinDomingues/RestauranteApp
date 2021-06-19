@@ -9,11 +9,13 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagLayout;
 import java.awt.LayoutManager;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 import org.netbeans.lib.awtextra.AbsoluteLayout;
@@ -21,7 +23,9 @@ import restauranteapp.BLL.MenuJpaController;
 import restauranteapp.DAL.Encomenda;
 import restauranteapp.DAL.Entidade;
 import restauranteapp.DAL.Mesas;
+import restauranteapp.DAL.Pedido;
 import restauranteapp.DAL.Produtoementa;
+import restauranteapp.DAL.Stockproduto;
 
 /**
  *
@@ -43,12 +47,6 @@ public class Menu extends javax.swing.JFrame {
         SwitchPanel(6);
         this.Username.setText(temp.getNome());
         this.Empresa.setText(temp.getIdEmpresa().getNome());
-        this.jPanel5.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
-        this.jPanel6.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
-        this.jPanel4.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
-        this.jPanel7.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
-        this.jPanel9.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
-        this.jPanel8.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
     }
 
     public void setButtonColor(javax.swing.JPanel panel){
@@ -91,45 +89,97 @@ public class Menu extends javax.swing.JFrame {
         }
     }
     
+    private void mostrarPedidos(){
+        verPedidos.removeAll();
+        List<Pedido> pedidos = mc.getPedidos();
+        
+        for(Pedido e: pedidos){
+            java.awt.Color cor = new Color(255, 255, 255);
+            if(e.getIdEstado().getIdEstado()==2){ // Pendente
+                cor = new Color(255,235,44);
+            }
+            if(e.getIdEstado().getIdEstado()==3){ // Pago
+                cor = new Color(60,147,232);
+            }
+            if(e.getIdEstado().getIdEstado()!=4){
+                JPanel jpMain = new javax.swing.JPanel();
+                JPanel jpPedido = new RoundedPanel(25, cor);
+                JPanel backgroundPanel = new RoundedPanel(25, new Color(255,255,255));
+                jpPedido.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
+                jpMain.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
+                
+                jpPedido.setPreferredSize(new java.awt.Dimension(169, 40));
+                backgroundPanel.setPreferredSize(new java.awt.Dimension(170, 250));
+                
+                javax.swing.JLabel jl = new javax.swing.JLabel();
+                jl.setFont(new java.awt.Font("Segoe UI", 0, 18));
+                jl.setText("Pedido ");
+                
+                javax.swing.JLabel jlNumber = new javax.swing.JLabel();
+                jlNumber.setFont(new java.awt.Font("Segoe UI", 0, 18));
+                jlNumber.setText(e.getCodpedido().toString());
+                
+                javax.swing.JLabel jlPedidoInfo = new javax.swing.JLabel("<html><div style='text-align: center;'>" 
+                        +"<b>Nome:</b><br>" + e.getIdEntidade().getNome()+"<br><b>Rua:</b><br>" +e.getIdEntidade().getRua()+"<br><b>Valor total:</b><br>" +e.getValortotal()+ "€<br><b>Hora:</b><br>"
+                        +e.getDatahora().getHours()+":"+e.getDatahora().getMinutes()+"h" + "</div></html>");
+                jlPedidoInfo.setFont(new java.awt.Font("Segoe UI", 0, 12));
+                jlPedidoInfo.setForeground(new Color(60,63,65));
+              //  jlPedidoInfo.setText(e.toString());
+                
+                jpPedido.add(jl);
+                jpPedido.add(jlNumber);
+                backgroundPanel.add(jpPedido);
+                backgroundPanel.add(jlPedidoInfo);
+                jpMain.add(backgroundPanel);
+                
+                verPedidos.add(jpMain);
+                
+            }
+        }
+        verPedidos.validate();
+        verPedidos.repaint();
+    }
+    
     private void mostrarMesas(){
+        jPanel2.removeAll();
         List<Mesas> mesas = mc.getMesas();
-        List<javax.swing.JPanel> painesMesas = new ArrayList<javax.swing.JPanel>();
         
         for(Mesas e : mesas){
-            JPanel jp = new JPanel();
-            jp.setBackground(new java.awt.Color(51, 153, 255));
+            JPanel jpMain = new javax.swing.JPanel();
+            jpMain.setPreferredSize(new java.awt.Dimension(200, 200));
+            JPanel jp = new RoundedPanel(25, new java.awt.Color(51, 153, 255));
+            jp.setLayout(new GridBagLayout());
+            jp.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.0f));
+            jp.setPreferredSize(new java.awt.Dimension(200, 100));
             javax.swing.JLabel jl = new javax.swing.JLabel("Mesa "+e.getIdMesa());
-            jl.setVisible(true);
             jp.add(jl);
-            jp.setVisible(true);
-            jPanel2.add(jp);
-            System.out.println("adicionada");
+            jpMain.add(jp);
+            jPanel2.add(jpMain);
         }
         jPanel2.validate();
         jPanel2.repaint();
     }
     
     private void populateProdutos(){
-        List<Produtoementa> produtosEmenta = this.mc.getProdutosEmenta();
+        List<Stockproduto> Stockprodutos = this.mc.getStockProdutos();
         DefaultTableModel tableProdutos = (DefaultTableModel) this.jTableProdutos.getModel();
-        System.out.println("Teste");
-        //tableProdutos.
+        tableProdutos.setRowCount(0);
         
         
-        for(Produtoementa e : produtosEmenta){
+        for(Stockproduto e : Stockprodutos){
             tableProdutos.insertRow(0, new Object[] { e.getNome() });
         }    
     }
     
     private void populateEncomendas(){
         List<Encomenda> encomendas = this.mc.getEncomendas();
-        DefaultTableModel tableProdutos = (DefaultTableModel) this.jTableEncomendas.getModel();
+        DefaultTableModel tableEncomendas = (DefaultTableModel) this.jTableEncomendas.getModel();
+        tableEncomendas.setRowCount(0);
         System.out.println("Teste");
-        //tableProdutos.
-        
+ 
         
         for(Encomenda e : encomendas){
-            tableProdutos.insertRow(0, new Object[] { e.getDescricao() });
+            tableEncomendas.insertRow(0, new Object[] { e.getDescricao() });
         }  
     }
     
@@ -164,19 +214,13 @@ public class Menu extends javax.swing.JFrame {
         jTextField4 = new javax.swing.JTextField();
         jPanel53 = new javax.swing.JPanel();
         jScrollPane8 = new javax.swing.JScrollPane();
-        jTextArea4 = new javax.swing.JTextArea();
+        jTextProdutos = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTableProdutos = new javax.swing.JTable();
         jPanel5 = new RoundedPanel(50, new Color(85, 167, 219));
         verMesas = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         verPedidos = new javax.swing.JPanel();
-        jPanel4 = new RoundedPanel(50, new Color(255,235,44));
-        jLabel2 = new javax.swing.JLabel();
-        jPanel7 = new RoundedPanel(25, new Color(255,255,255));
-        jPanel9 = new RoundedPanel(50, new Color(60,147,232));
-        jLabel3 = new javax.swing.JLabel();
-        jPanel8 = new RoundedPanel(25, new Color(255,255,255));
         verEncomendas = new javax.swing.JPanel();
         jTextField5 = new javax.swing.JTextField();
         jPanel55 = new javax.swing.JPanel();
@@ -187,14 +231,26 @@ public class Menu extends javax.swing.JFrame {
         jPanel6 = new RoundedPanel(50, new Color(85, 167, 219));
         mesas = new javax.swing.JPanel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
-        jTabbedPane2 = new javax.swing.JTabbedPane();
-        jTabbedPane3 = new javax.swing.JTabbedPane();
-        jTabbedPane4 = new javax.swing.JTabbedPane();
-        jTabbedPane5 = new javax.swing.JTabbedPane();
+        Entradas = new javax.swing.JScrollPane();
+        jList1 = new javax.swing.JList<>();
+        Comida = new javax.swing.JScrollPane();
+        jList2 = new javax.swing.JList<>();
+        Sobremesa = new javax.swing.JScrollPane();
+        jList3 = new javax.swing.JList<>();
+        Bebida = new javax.swing.JScrollPane();
+        jList4 = new javax.swing.JList<>();
         jPanel3 = new javax.swing.JPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jListProdutosAdicionar = new javax.swing.JList<>();
+        jLabel5 = new javax.swing.JLabel();
+        jSpinner1 = new javax.swing.JSpinner();
         jPanel23 = new javax.swing.JPanel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        jListProdutosAdicionados = new javax.swing.JList<>();
         jPanel24 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
         jPanel25 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -446,9 +502,9 @@ public class Menu extends javax.swing.JFrame {
 
         verProdutos.add(jPanel53, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 100, 20, 20));
 
-        jTextArea4.setColumns(20);
-        jTextArea4.setRows(5);
-        jScrollPane8.setViewportView(jTextArea4);
+        jTextProdutos.setColumns(20);
+        jTextProdutos.setRows(5);
+        jScrollPane8.setViewportView(jTextProdutos);
 
         verProdutos.add(jScrollPane8, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 150, 580, 420));
 
@@ -463,6 +519,11 @@ public class Menu extends javax.swing.JFrame {
                 "Produto"
             }
         ));
+        jTableProdutos.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableProdutosMouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(jTableProdutos);
 
         verProdutos.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 150, 250, 420));
@@ -484,96 +545,19 @@ public class Menu extends javax.swing.JFrame {
 
         verMesas.setMinimumSize(new java.awt.Dimension(1093, 645));
         verMesas.setPreferredSize(new java.awt.Dimension(1093, 645));
-        verMesas.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel2.setPreferredSize(new java.awt.Dimension(1080, 636));
+        jPanel2.setSize(1093, 645);
+        jPanel2.setLayout(new java.awt.GridLayout());
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1090, Short.MAX_VALUE)
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 640, Short.MAX_VALUE)
-        );
+        jPanel2.setLayout(new java.awt.GridLayout(5, 5, 10, 10));
 
-        verMesas.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 1090, 640));
+        verMesas.add(jPanel2);
 
         verPedidos.setMinimumSize(new java.awt.Dimension(1093, 645));
         verPedidos.setPreferredSize(new java.awt.Dimension(1093, 645));
-        verPedidos.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel2.setText("Pedido 1");
-
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap(51, Short.MAX_VALUE)
-                .addComponent(jLabel2)
-                .addGap(47, 47, 47))
-        );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel2)
-                .addContainerGap(9, Short.MAX_VALUE))
-        );
-
-        verPedidos.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 60, 170, 40));
-
-        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
-        jPanel7.setLayout(jPanel7Layout);
-        jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 170, Short.MAX_VALUE)
-        );
-        jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 250, Short.MAX_VALUE)
-        );
-
-        verPedidos.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 80, 170, 250));
-
-        jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel3.setText("Pedido 2");
-
-        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
-        jPanel9.setLayout(jPanel9Layout);
-        jPanel9Layout.setHorizontalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
-                .addContainerGap(51, Short.MAX_VALUE)
-                .addComponent(jLabel3)
-                .addGap(47, 47, 47))
-        );
-        jPanel9Layout.setVerticalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel9Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel3)
-                .addContainerGap(9, Short.MAX_VALUE))
-        );
-
-        verPedidos.add(jPanel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 60, 170, -1));
-
-        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
-        jPanel8.setLayout(jPanel8Layout);
-        jPanel8Layout.setHorizontalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 170, Short.MAX_VALUE)
-        );
-        jPanel8Layout.setVerticalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 250, Short.MAX_VALUE)
-        );
-
-        verPedidos.add(jPanel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 80, 170, -1));
+        verPedidos.setLayout(new java.awt.GridLayout());
+        verPedidos.setLayout(new java.awt.GridLayout(2, 4, 10, 10));
 
         verEncomendas.setMinimumSize(new java.awt.Dimension(1093, 645));
         verEncomendas.setPreferredSize(new java.awt.Dimension(1093, 645));
@@ -638,72 +622,147 @@ public class Menu extends javax.swing.JFrame {
         mesas.setPreferredSize(new java.awt.Dimension(1090, 642));
         mesas.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jTabbedPane1.addTab("Entradas", jTabbedPane2);
-        jTabbedPane1.addTab("Comida", jTabbedPane3);
-        jTabbedPane1.addTab("Sobremesa", jTabbedPane4);
-        jTabbedPane1.addTab("Bebida", jTabbedPane5);
+        jList1.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        Entradas.setViewportView(jList1);
+
+        jTabbedPane1.addTab("Entradas", Entradas);
+
+        jList2.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        Comida.setViewportView(jList2);
+
+        jTabbedPane1.addTab("Comida", Comida);
+
+        jList3.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        Sobremesa.setViewportView(jList3);
+
+        jTabbedPane1.addTab("Sobremesa", Sobremesa);
+
+        jList4.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        Bebida.setViewportView(jList4);
+
+        jTabbedPane1.addTab("Bebida", Bebida);
 
         mesas.add(jTabbedPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 30, 970, 280));
 
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
 
+        jListProdutosAdicionar.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane3.setViewportView(jListProdutosAdicionar);
+
+        jLabel5.setBackground(new java.awt.Color(0, 0, 0));
+        jLabel5.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel5.setText("Quantidade:");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 360, Short.MAX_VALUE)
+            .addComponent(jScrollPane3)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(176, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 250, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         mesas.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 340, 360, 250));
 
         jPanel23.setBackground(new java.awt.Color(255, 255, 255));
 
+        jListProdutosAdicionados.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane4.setViewportView(jListProdutosAdicionados);
+
         javax.swing.GroupLayout jPanel23Layout = new javax.swing.GroupLayout(jPanel23);
         jPanel23.setLayout(jPanel23Layout);
         jPanel23Layout.setHorizontalGroup(
             jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 370, Short.MAX_VALUE)
+            .addGroup(jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 370, Short.MAX_VALUE))
         );
         jPanel23Layout.setVerticalGroup(
             jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 250, Short.MAX_VALUE)
+            .addGroup(jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE))
         );
 
-        mesas.add(jPanel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 340, -1, 250));
+        mesas.add(jPanel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 340, -1, 250));
 
         jPanel24.setBackground(new java.awt.Color(255, 255, 255));
+
+        jLabel1.setBackground(new java.awt.Color(0, 0, 0));
+        jLabel1.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setText("Adicionar");
 
         javax.swing.GroupLayout jPanel24Layout = new javax.swing.GroupLayout(jPanel24);
         jPanel24.setLayout(jPanel24Layout);
         jPanel24Layout.setHorizontalGroup(
             jPanel24Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 70, Short.MAX_VALUE)
+            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
         );
         jPanel24Layout.setVerticalGroup(
             jPanel24Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 70, Short.MAX_VALUE)
+            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
         );
 
-        mesas.add(jPanel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 360, 70, 70));
+        mesas.add(jPanel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 360, 70, 70));
 
         jPanel25.setBackground(new java.awt.Color(255, 255, 255));
+
+        jLabel4.setBackground(new java.awt.Color(0, 0, 0));
+        jLabel4.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel4.setText("Remover");
 
         javax.swing.GroupLayout jPanel25Layout = new javax.swing.GroupLayout(jPanel25);
         jPanel25.setLayout(jPanel25Layout);
         jPanel25Layout.setHorizontalGroup(
             jPanel25Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 70, Short.MAX_VALUE)
+            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
         );
         jPanel25Layout.setVerticalGroup(
             jPanel25Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 70, Short.MAX_VALUE)
+            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
         );
 
-        mesas.add(jPanel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 500, -1, -1));
+        mesas.add(jPanel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 500, -1, -1));
 
         jLayeredPane1.setLayer(defaultpanel, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane1.setLayer(verProdutos, javax.swing.JLayeredPane.DEFAULT_LAYER);
@@ -786,6 +845,7 @@ public class Menu extends javax.swing.JFrame {
         SwitchPanel(2);
         resetAllButtonColors();
         setButtonColor(this.PedidosButton);
+        mostrarPedidos();
     }//GEN-LAST:event_PedidosButtonMouseClicked
 
     private void ProdutosButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProdutosButtonMouseClicked
@@ -794,6 +854,7 @@ public class Menu extends javax.swing.JFrame {
         resetAllButtonColors();
         setButtonColor(this.ProdutosButton);
         populateProdutos();
+        this.jTextProdutos.setText("");
     }//GEN-LAST:event_ProdutosButtonMouseClicked
 
     private void EncomendasButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EncomendasButtonMouseClicked
@@ -814,6 +875,7 @@ public class Menu extends javax.swing.JFrame {
         SwitchPanel(2);
         resetAllButtonColors();
         setButtonColor(this.PedidosButton);
+        mostrarPedidos();
     }//GEN-LAST:event_PedidosButtonLabelMouseClicked
 
     private void MesasButtonLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_MesasButtonLabelMouseClicked
@@ -829,6 +891,7 @@ public class Menu extends javax.swing.JFrame {
         resetAllButtonColors();
         setButtonColor(this.ProdutosButton);
         populateProdutos();
+        this.jTextProdutos.setText("");
     }//GEN-LAST:event_ProdutosButtonLabelMouseClicked
 
     private void EncomendasButtonLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EncomendasButtonLabelMouseClicked
@@ -950,6 +1013,13 @@ public class Menu extends javax.swing.JFrame {
         resetButtonColor(this.DesconectarButton);
     }//GEN-LAST:event_DesconectarMouseExited
 
+    private void jTableProdutosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableProdutosMouseClicked
+        // TODO add your handling code here:
+        String nome = this.jTableProdutos.getValueAt(this.jTableProdutos.getSelectedRow(), 0).toString();
+        Stockproduto temp = this.mc.findStockProdutoNome(nome);
+        this.jTextProdutos.setText(temp.toString());
+    }//GEN-LAST:event_jTableProdutosMouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -986,23 +1056,34 @@ public class Menu extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane Bebida;
+    private javax.swing.JScrollPane Comida;
     private javax.swing.JLabel Desconectar;
     private javax.swing.JPanel DesconectarButton;
     private javax.swing.JLabel Empresa;
     private javax.swing.JPanel EncomendasButton;
     private javax.swing.JLabel EncomendasButtonLabel;
+    private javax.swing.JScrollPane Entradas;
     private javax.swing.JPanel MesasButton;
     private javax.swing.JLabel MesasButtonLabel;
     private javax.swing.JPanel PedidosButton;
     private javax.swing.JLabel PedidosButtonLabel;
     private javax.swing.JPanel ProdutosButton;
     private javax.swing.JLabel ProdutosButtonLabel;
+    private javax.swing.JScrollPane Sobremesa;
     private javax.swing.JLabel Username;
     private javax.swing.JPanel defaultpanel;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLayeredPane jLayeredPane1;
+    private javax.swing.JList<String> jList1;
+    private javax.swing.JList<String> jList2;
+    private javax.swing.JList<String> jList3;
+    private javax.swing.JList<String> jList4;
+    private javax.swing.JList<String> jListProdutosAdicionados;
+    private javax.swing.JList<String> jListProdutosAdicionar;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel23;
@@ -1010,30 +1091,25 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel25;
     private javax.swing.JPanel jPanel26;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel52;
     private javax.swing.JPanel jPanel53;
     private javax.swing.JPanel jPanel55;
     private javax.swing.JPanel jPanel6;
-    private javax.swing.JPanel jPanel7;
-    private javax.swing.JPanel jPanel8;
-    private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane10;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane8;
+    private javax.swing.JSpinner jSpinner1;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTabbedPane jTabbedPane2;
-    private javax.swing.JTabbedPane jTabbedPane3;
-    private javax.swing.JTabbedPane jTabbedPane4;
-    private javax.swing.JTabbedPane jTabbedPane5;
     private javax.swing.JTable jTableEncomendas;
     private javax.swing.JTable jTableProdutos;
-    private javax.swing.JTextArea jTextArea4;
     private javax.swing.JTextArea jTextArea5;
     private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField jTextField5;
+    private javax.swing.JTextArea jTextProdutos;
     private javax.swing.JPanel mesas;
     private javax.swing.JPanel verEncomendas;
     private javax.swing.JPanel verMesas;
