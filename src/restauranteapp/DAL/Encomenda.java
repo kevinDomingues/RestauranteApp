@@ -98,7 +98,7 @@ public class Encomenda implements Serializable {
     public void setDatahora(Date datahora) {
         this.datahora = datahora;
     }
-
+    
     public double getValortotal() {
         return valortotal;
     }

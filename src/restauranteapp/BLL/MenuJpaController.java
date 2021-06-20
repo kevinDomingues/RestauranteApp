@@ -32,7 +32,8 @@ public class MenuJpaController {
     private ProdutoementaJpaController pec;
     private EncomendaJpaController ec;
     private StockprodutoJpaController spc;
-
+    private EstadoJpaController estc;
+    
     public MenuJpaController() {
         this.em = Persistence.createEntityManagerFactory("RestauranteAppPU");
         this.mc = new MesasJpaController(em);
@@ -40,6 +41,11 @@ public class MenuJpaController {
         this.pec = new ProdutoementaJpaController(em);
         this.ec = new EncomendaJpaController(em);
         this.spc = new StockprodutoJpaController(em);
+        this.estc = new EstadoJpaController(em);
+    }
+    
+    public Encomenda findEncomendaId(int id){
+        return ec.findEncomenda(id);
     }
     
     public Estado findEstadoId(int id){
@@ -141,6 +147,11 @@ public class MenuJpaController {
     public List<Encomenda> getEncomendas(){      
         List<Encomenda> encomendas = ec.findEncomendaEntities();
         return encomendas;
+    }
+    
+    public List<Estado> getEstados(){
+        List<Estado> estados = estc.findEstadoEntities();
+        return estados;
     }
     
     public void createPedido(Pedido pedido){

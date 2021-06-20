@@ -12,6 +12,9 @@ import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
 import java.awt.LayoutManager;
 import java.awt.RenderingHints;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BoxLayout;
@@ -22,9 +25,11 @@ import org.netbeans.lib.awtextra.AbsoluteLayout;
 import restauranteapp.BLL.MenuJpaController;
 import restauranteapp.DAL.Encomenda;
 import restauranteapp.DAL.Entidade;
+import restauranteapp.DAL.Estado;
 import restauranteapp.DAL.Mesas;
 import restauranteapp.DAL.Pedido;
 import restauranteapp.DAL.Produtoementa;
+import restauranteapp.DAL.Reserva;
 import restauranteapp.DAL.Stockproduto;
 
 /**
@@ -47,6 +52,8 @@ public class Menu extends javax.swing.JFrame {
         SwitchPanel(6);
         this.Username.setText(temp.getNome());
         this.Empresa.setText(temp.getIdEmpresa().getNome());
+        populateEstados();
+        this.Reservas.setVisible(true);
     }
 
     public void setButtonColor(javax.swing.JPanel panel){
@@ -75,6 +82,7 @@ public class Menu extends javax.swing.JFrame {
         this.verEncomendas.setVisible(false);
         this.mesas.setVisible(false);
         this.defaultpanel.setVisible(false);
+        this.Reservas.setVisible(false);
     }
     
     public void SwitchPanel(int panelNumber) {
@@ -154,10 +162,66 @@ public class Menu extends javax.swing.JFrame {
             javax.swing.JLabel jl = new javax.swing.JLabel("Mesa "+e.getIdMesa());
             jp.add(jl);
             jpMain.add(jp);
+            
+            int idMesa = Integer.parseInt(e.getIdMesa().toString());
+            
+            jpMain.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent evt) {
+                    MesasReservasButtonMouseClicked(evt, idMesa);
+                }
+                public void mouseEntered(java.awt.event.MouseEvent evt) {}
+                public void mouseExited(java.awt.event.MouseEvent evt) {}
+            });
             jPanel2.add(jpMain);
         }
         jPanel2.validate();
         jPanel2.repaint();
+    }
+    
+    private void MesasReservasButtonMouseClicked(java.awt.event.MouseEvent evt, int idMesa){
+        clearPanels();
+        this.Reservas.setVisible(true);
+        populateReservas(idMesa);
+    }
+    
+    private void mostrarInfoStockProduto(Stockproduto temp){
+        double precoPlusIva = temp.getPreco() + (temp.getPreco()*temp.getTaxa());
+        
+        this.produtoNomeField.setText(temp.getNome());
+        this.precoSemIva.setText(String.valueOf(temp.getPreco()));
+        this.Taxa.setText(String.valueOf(temp.getTaxa()));
+        this.precoComIva.setText(String.valueOf(precoPlusIva));
+        this.Descricao.setText(temp.getDescricao());
+        this.jSpinner2.setValue(Integer.valueOf(temp.getQuantidade()));
+    }
+    
+    private void mostrarInfoEncomenda(Encomenda temp){
+        this.nomeFornecedor.setText(temp.getIdFornecedor().getNome());
+        this.valorTotal.setText(String.valueOf(temp.getValortotal()));
+        this.dataHora1.setText(String.valueOf(temp.getDatahora().toGMTString()));
+        this.Descricao1.setText(temp.getDescricao());
+        this.estadoComboBox.setSelectedItem(temp.getIdEstado().getEstado());
+        
+    }
+    
+    private void populateReservas(int idMesa){
+        DefaultTableModel reservasPorAceitar = (DefaultTableModel) this.ReservasPorAceitar.getModel();
+        DefaultTableModel reservasAceites = (DefaultTableModel) this.ReservasAceites.getModel();
+        reservasPorAceitar.setRowCount(0);
+        reservasAceites.setRowCount(0);
+        
+        Mesas temp = this.mc.findMesaId(idMesa);
+        List<Reserva> reservasMesa = temp.getReservaList();
+        
+        for(Reserva e : reservasMesa){
+            if(e.getIdEstado().getIdEstado()==2){
+                reservasPorAceitar.insertRow(0, new Object[] { e.getIdReserva(), e.getIdEntidade().getNome(), e.getNpessoas(), e.getDatahora().toGMTString()});
+            }
+            if(e.getIdEstado().getIdEstado()==5){
+                reservasAceites.insertRow(0, new Object[] { e.getIdReserva(), e.getIdEntidade().getNome(), e.getNpessoas(), e.getDatahora().toGMTString()});
+            }
+        }
+        
     }
     
     private void populateProdutos(){
@@ -175,14 +239,20 @@ public class Menu extends javax.swing.JFrame {
         List<Encomenda> encomendas = this.mc.getEncomendas();
         DefaultTableModel tableEncomendas = (DefaultTableModel) this.jTableEncomendas.getModel();
         tableEncomendas.setRowCount(0);
-        System.out.println("Teste");
  
         
         for(Encomenda e : encomendas){
-            tableEncomendas.insertRow(0, new Object[] { e.getDescricao() });
+            tableEncomendas.insertRow(0, new Object[] { e.getIdEncomenda() ,e.getDescricao() });
         }  
     }
     
+    private void populateEstados(){
+        List<Estado> estados = this.mc.getEstados();
+        
+        for(Estado e : estados){
+            this.estadoComboBox.addItem(e.getEstado());
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -209,12 +279,33 @@ public class Menu extends javax.swing.JFrame {
         Empresa = new javax.swing.JLabel();
         jPanel52 = new javax.swing.JPanel();
         jLayeredPane1 = new javax.swing.JLayeredPane();
+        Reservas = new javax.swing.JPanel();
+        VoltarDeReservas = new javax.swing.JButton();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        ReservasPorAceitar = new javax.swing.JTable();
+        jScrollPane7 = new javax.swing.JScrollPane();
+        ReservasAceites = new javax.swing.JTable();
+        GuardarStockProduto1 = new javax.swing.JButton();
+        RecusarReserva = new javax.swing.JButton();
         defaultpanel = new javax.swing.JPanel();
         verProdutos = new javax.swing.JPanel();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        precoSemIva = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        produtoNomeField = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        Taxa = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        precoComIva = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        ApagarStockProduto = new javax.swing.JButton();
+        GuardarStockProduto = new javax.swing.JButton();
+        Descricao = new javax.swing.JTextField();
+        jLabel11 = new javax.swing.JLabel();
+        jSpinner2 = new javax.swing.JSpinner();
         jTextField4 = new javax.swing.JTextField();
         jPanel53 = new javax.swing.JPanel();
-        jScrollPane8 = new javax.swing.JScrollPane();
-        jTextProdutos = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTableProdutos = new javax.swing.JTable();
         jPanel5 = new RoundedPanel(50, new Color(85, 167, 219));
@@ -222,12 +313,23 @@ public class Menu extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         verPedidos = new javax.swing.JPanel();
         verEncomendas = new javax.swing.JPanel();
+        jPanel7 = new javax.swing.JPanel();
+        jLabel12 = new javax.swing.JLabel();
+        valorTotal = new javax.swing.JTextField();
+        jLabel13 = new javax.swing.JLabel();
+        nomeFornecedor = new javax.swing.JTextField();
+        jLabel16 = new javax.swing.JLabel();
+        ApagarEncomenda = new javax.swing.JButton();
+        GuardarEncomenda = new javax.swing.JButton();
+        Descricao1 = new javax.swing.JTextField();
+        jLabel17 = new javax.swing.JLabel();
+        dataHora1 = new javax.swing.JTextField();
+        jLabel18 = new javax.swing.JLabel();
+        estadoComboBox = new javax.swing.JComboBox<>();
         jTextField5 = new javax.swing.JTextField();
         jPanel55 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTableEncomendas = new javax.swing.JTable();
-        jScrollPane10 = new javax.swing.JScrollPane();
-        jTextArea5 = new javax.swing.JTextArea();
         jPanel6 = new RoundedPanel(50, new Color(85, 167, 219));
         mesas = new javax.swing.JPanel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
@@ -475,6 +577,88 @@ public class Menu extends javax.swing.JFrame {
 
         jPanel1.add(jPanel52, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 260, 2));
 
+        Reservas.setMinimumSize(new java.awt.Dimension(1093, 645));
+        Reservas.setPreferredSize(new java.awt.Dimension(1093, 645));
+        Reservas.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        VoltarDeReservas.setText("Voltar");
+        VoltarDeReservas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                VoltarDeReservasActionPerformed(evt);
+            }
+        });
+        Reservas.add(VoltarDeReservas, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 17, -1, -1));
+
+        ReservasPorAceitar.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "id", "Cliente", "Número Pessoas", "Data e Hora"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jScrollPane6.setViewportView(ReservasPorAceitar);
+
+        Reservas.add(jScrollPane6, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, 440, 510));
+
+        ReservasAceites.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "id", "Cliente", "Número Pessoas", "Data e Hora"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jScrollPane7.setViewportView(ReservasAceites);
+
+        Reservas.add(jScrollPane7, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 80, 440, 510));
+
+        GuardarStockProduto1.setBackground(new java.awt.Color(228, 255, 201));
+        GuardarStockProduto1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        GuardarStockProduto1.setForeground(new java.awt.Color(102, 102, 102));
+        GuardarStockProduto1.setText("Aceitar");
+        GuardarStockProduto1.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        GuardarStockProduto1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                GuardarStockProduto1ActionPerformed(evt);
+            }
+        });
+        Reservas.add(GuardarStockProduto1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 240, 142, 42));
+
+        RecusarReserva.setBackground(new java.awt.Color(255, 202, 193));
+        RecusarReserva.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        RecusarReserva.setForeground(new java.awt.Color(102, 102, 102));
+        RecusarReserva.setText("Recusar");
+        RecusarReserva.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        RecusarReserva.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                RecusarReservaActionPerformed(evt);
+            }
+        });
+        Reservas.add(RecusarReserva, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 390, 142, 42));
+
         defaultpanel.setMinimumSize(new java.awt.Dimension(10, 11));
         defaultpanel.setPreferredSize(new java.awt.Dimension(1090, 642));
         defaultpanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -482,6 +666,173 @@ public class Menu extends javax.swing.JFrame {
         verProdutos.setMinimumSize(new java.awt.Dimension(1093, 645));
         verProdutos.setPreferredSize(new java.awt.Dimension(1093, 645));
         verProdutos.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanel4.setBackground(new java.awt.Color(255, 255, 255));
+
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel3.setText("Preço s/ Iva");
+
+        precoSemIva.setBackground(new java.awt.Color(240, 240, 240));
+        precoSemIva.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        precoSemIva.setForeground(new java.awt.Color(0, 0, 0));
+        precoSemIva.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        precoSemIva.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                precoSemIvaActionPerformed(evt);
+            }
+        });
+
+        jLabel6.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel6.setText("Nome produto");
+
+        produtoNomeField.setBackground(new java.awt.Color(240, 240, 240));
+        produtoNomeField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        produtoNomeField.setForeground(new java.awt.Color(0, 0, 0));
+        produtoNomeField.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        produtoNomeField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                produtoNomeFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel7.setText("Taxa");
+
+        Taxa.setBackground(new java.awt.Color(240, 240, 240));
+        Taxa.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        Taxa.setForeground(new java.awt.Color(0, 0, 0));
+        Taxa.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        Taxa.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                TaxaMouseExited(evt);
+            }
+        });
+        Taxa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TaxaActionPerformed(evt);
+            }
+        });
+
+        jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel9.setText("Preço c/ Iva");
+
+        precoComIva.setBackground(new java.awt.Color(240, 240, 240));
+        precoComIva.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        precoComIva.setForeground(new java.awt.Color(0, 0, 0));
+        precoComIva.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        precoComIva.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                precoComIvaActionPerformed(evt);
+            }
+        });
+
+        jLabel10.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel10.setText("Descrição");
+
+        ApagarStockProduto.setBackground(new java.awt.Color(255, 202, 193));
+        ApagarStockProduto.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        ApagarStockProduto.setForeground(new java.awt.Color(102, 102, 102));
+        ApagarStockProduto.setText("Apagar");
+        ApagarStockProduto.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        ApagarStockProduto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ApagarStockProdutoActionPerformed(evt);
+            }
+        });
+
+        GuardarStockProduto.setBackground(new java.awt.Color(228, 255, 201));
+        GuardarStockProduto.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        GuardarStockProduto.setForeground(new java.awt.Color(102, 102, 102));
+        GuardarStockProduto.setText("Guardar");
+        GuardarStockProduto.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        GuardarStockProduto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                GuardarStockProdutoActionPerformed(evt);
+            }
+        });
+
+        Descricao.setBackground(new java.awt.Color(240, 240, 240));
+        Descricao.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        Descricao.setForeground(new java.awt.Color(0, 0, 0));
+        Descricao.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        Descricao.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DescricaoActionPerformed(evt);
+            }
+        });
+
+        jLabel11.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel11.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel11.setText("Quantidade");
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addContainerGap(109, Short.MAX_VALUE)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(GuardarStockProduto, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addGap(116, 116, 116)
+                                .addComponent(jLabel6))
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel3)
+                                    .addComponent(precoSemIva, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(Taxa)
+                                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(10, 10, 10)
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(precoComIva, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING)))
+                            .addComponent(produtoNomeField)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(ApagarStockProduto, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(Descricao))))
+                .addGap(106, 106, 106))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(37, 37, 37)
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(produtoNomeField, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel7)
+                    .addComponent(jLabel9))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(precoSemIva, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Taxa, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(precoComIva, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(Descricao, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel11)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(ApagarStockProduto, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(GuardarStockProduto, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(32, 32, 32))
+        );
+
+        verProdutos.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 150, 580, 420));
 
         jTextField4.setText("Pesquisar");
         verProdutos.add(jTextField4, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 100, 220, -1));
@@ -501,12 +852,6 @@ public class Menu extends javax.swing.JFrame {
         );
 
         verProdutos.add(jPanel53, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 100, 20, 20));
-
-        jTextProdutos.setColumns(20);
-        jTextProdutos.setRows(5);
-        jScrollPane8.setViewportView(jTextProdutos);
-
-        verProdutos.add(jScrollPane8, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 150, 580, 420));
 
         jTableProdutos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -548,7 +893,7 @@ public class Menu extends javax.swing.JFrame {
 
         jPanel2.setPreferredSize(new java.awt.Dimension(1080, 636));
         jPanel2.setSize(1093, 645);
-        jPanel2.setLayout(new java.awt.GridLayout());
+        jPanel2.setLayout(new java.awt.GridLayout(1, 0));
 
         jPanel2.setLayout(new java.awt.GridLayout(5, 5, 10, 10));
 
@@ -556,12 +901,170 @@ public class Menu extends javax.swing.JFrame {
 
         verPedidos.setMinimumSize(new java.awt.Dimension(1093, 645));
         verPedidos.setPreferredSize(new java.awt.Dimension(1093, 645));
-        verPedidos.setLayout(new java.awt.GridLayout());
+        verPedidos.setLayout(new java.awt.GridLayout(1, 0));
         verPedidos.setLayout(new java.awt.GridLayout(2, 4, 10, 10));
 
         verEncomendas.setMinimumSize(new java.awt.Dimension(1093, 645));
         verEncomendas.setPreferredSize(new java.awt.Dimension(1093, 645));
         verEncomendas.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanel7.setBackground(new java.awt.Color(255, 255, 255));
+
+        jLabel12.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel12.setText("Valor total");
+
+        valorTotal.setBackground(new java.awt.Color(240, 240, 240));
+        valorTotal.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        valorTotal.setForeground(new java.awt.Color(0, 0, 0));
+        valorTotal.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        valorTotal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                valorTotalActionPerformed(evt);
+            }
+        });
+
+        jLabel13.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel13.setText("Fornecedor");
+
+        nomeFornecedor.setBackground(new java.awt.Color(240, 240, 240));
+        nomeFornecedor.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        nomeFornecedor.setForeground(new java.awt.Color(0, 0, 0));
+        nomeFornecedor.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        nomeFornecedor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nomeFornecedorActionPerformed(evt);
+            }
+        });
+
+        jLabel16.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel16.setText("Descrição");
+
+        ApagarEncomenda.setBackground(new java.awt.Color(255, 202, 193));
+        ApagarEncomenda.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        ApagarEncomenda.setForeground(new java.awt.Color(102, 102, 102));
+        ApagarEncomenda.setText("Apagar");
+        ApagarEncomenda.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        ApagarEncomenda.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ApagarEncomendaActionPerformed(evt);
+            }
+        });
+
+        GuardarEncomenda.setBackground(new java.awt.Color(228, 255, 201));
+        GuardarEncomenda.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        GuardarEncomenda.setForeground(new java.awt.Color(102, 102, 102));
+        GuardarEncomenda.setText("Guardar");
+        GuardarEncomenda.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        GuardarEncomenda.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                GuardarEncomendaActionPerformed(evt);
+            }
+        });
+
+        Descricao1.setBackground(new java.awt.Color(240, 240, 240));
+        Descricao1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        Descricao1.setForeground(new java.awt.Color(0, 0, 0));
+        Descricao1.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        Descricao1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                Descricao1ActionPerformed(evt);
+            }
+        });
+
+        jLabel17.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel17.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel17.setText("Data");
+
+        dataHora1.setBackground(new java.awt.Color(240, 240, 240));
+        dataHora1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        dataHora1.setForeground(new java.awt.Color(0, 0, 0));
+        dataHora1.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        dataHora1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                dataHora1ActionPerformed(evt);
+            }
+        });
+
+        jLabel18.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel18.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel18.setText("Estado");
+
+        estadoComboBox.setBackground(new java.awt.Color(240, 240, 240));
+        estadoComboBox.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        estadoComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] {}));
+        estadoComboBox.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
+                .addContainerGap(109, Short.MAX_VALUE)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel7Layout.createSequentialGroup()
+                        .addComponent(GuardarEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(nomeFornecedor)
+                            .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, 365, Short.MAX_VALUE)
+                            .addComponent(ApagarEncomenda, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(Descricao1)
+                            .addGroup(jPanel7Layout.createSequentialGroup()
+                                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(valorTotal)
+                                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
+                                        .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(42, 42, 42))
+                                    .addComponent(dataHora1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(estadoComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addGap(106, 106, 106))
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel7Layout.createSequentialGroup()
+                        .addGap(238, 238, 238)
+                        .addComponent(jLabel13))
+                    .addGroup(jPanel7Layout.createSequentialGroup()
+                        .addGap(205, 205, 205)
+                        .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addGap(37, 37, 37)
+                .addComponent(jLabel13)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(nomeFornecedor, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel12)
+                    .addComponent(jLabel17))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(valorTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(dataHora1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel16)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(Descricao1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(estadoComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(ApagarEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(GuardarEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(32, 32, 32))
+        );
+
+        verEncomendas.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 150, 580, 420));
 
         jTextField5.setText("Pesquisar");
         verEncomendas.add(jTextField5, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 100, 220, -1));
@@ -584,24 +1087,26 @@ public class Menu extends javax.swing.JFrame {
 
         jTableEncomendas.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null},
-                {null},
-                {null},
-                {null}
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null}
             },
             new String [] {
-                "Encomendas"
+                "id", "Encomendas"
             }
         ));
+        jTableEncomendas.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableEncomendasMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jTableEncomendas);
+        if (jTableEncomendas.getColumnModel().getColumnCount() > 0) {
+            jTableEncomendas.getColumnModel().getColumn(0).setMaxWidth(35);
+        }
 
         verEncomendas.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 150, 250, 420));
-
-        jTextArea5.setColumns(20);
-        jTextArea5.setRows(5);
-        jScrollPane10.setViewportView(jTextArea5);
-
-        verEncomendas.add(jScrollPane10, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 150, 580, 420));
 
         jPanel6.setBackground(new java.awt.Color(87, 167, 219));
 
@@ -764,6 +1269,7 @@ public class Menu extends javax.swing.JFrame {
 
         mesas.add(jPanel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 500, -1, -1));
 
+        jLayeredPane1.setLayer(Reservas, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane1.setLayer(defaultpanel, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane1.setLayer(verProdutos, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane1.setLayer(verMesas, javax.swing.JLayeredPane.DEFAULT_LAYER);
@@ -775,33 +1281,38 @@ public class Menu extends javax.swing.JFrame {
         jLayeredPane1.setLayout(jLayeredPane1Layout);
         jLayeredPane1Layout.setHorizontalGroup(
             jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(verMesas, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1113, Short.MAX_VALUE)
+            .addComponent(verMesas, javax.swing.GroupLayout.PREFERRED_SIZE, 1259, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(verPedidos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(verPedidos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1259, Short.MAX_VALUE))
             .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(verEncomendas, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(verEncomendas, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1259, Short.MAX_VALUE))
             .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(verProdutos, javax.swing.GroupLayout.DEFAULT_SIZE, 1113, Short.MAX_VALUE))
+                .addComponent(verProdutos, javax.swing.GroupLayout.DEFAULT_SIZE, 1259, Short.MAX_VALUE))
             .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jLayeredPane1Layout.createSequentialGroup()
-                    .addGap(0, 0, Short.MAX_VALUE)
-                    .addComponent(defaultpanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGap(0, 0, Short.MAX_VALUE)))
+                    .addGap(0, 56, Short.MAX_VALUE)
+                    .addComponent(defaultpanel, javax.swing.GroupLayout.DEFAULT_SIZE, 1146, Short.MAX_VALUE)
+                    .addGap(0, 57, Short.MAX_VALUE)))
             .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jLayeredPane1Layout.createSequentialGroup()
                     .addContainerGap()
-                    .addComponent(mesas, javax.swing.GroupLayout.DEFAULT_SIZE, 783, Short.MAX_VALUE)
+                    .addComponent(mesas, javax.swing.GroupLayout.DEFAULT_SIZE, 929, Short.MAX_VALUE)
                     .addGap(324, 324, 324)))
+            .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jLayeredPane1Layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(Reservas, javax.swing.GroupLayout.PREFERRED_SIZE, 1230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(23, Short.MAX_VALUE)))
         );
         jLayeredPane1Layout.setVerticalGroup(
             jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(verMesas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(verMesas, javax.swing.GroupLayout.PREFERRED_SIZE, 676, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addComponent(verPedidos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addComponent(verEncomendas, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(verProdutos, javax.swing.GroupLayout.DEFAULT_SIZE, 662, Short.MAX_VALUE))
+                .addComponent(verProdutos, javax.swing.GroupLayout.DEFAULT_SIZE, 676, Short.MAX_VALUE))
             .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jLayeredPane1Layout.createSequentialGroup()
                     .addGap(0, 0, Short.MAX_VALUE)
@@ -810,8 +1321,13 @@ public class Menu extends javax.swing.JFrame {
             .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jLayeredPane1Layout.createSequentialGroup()
                     .addContainerGap()
-                    .addComponent(mesas, javax.swing.GroupLayout.DEFAULT_SIZE, 641, Short.MAX_VALUE)
+                    .addComponent(mesas, javax.swing.GroupLayout.DEFAULT_SIZE, 655, Short.MAX_VALUE)
                     .addGap(15, 15, 15)))
+            .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jLayeredPane1Layout.createSequentialGroup()
+                    .addContainerGap(15, Short.MAX_VALUE)
+                    .addComponent(Reservas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(16, Short.MAX_VALUE)))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -821,7 +1337,8 @@ public class Menu extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 308, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLayeredPane1))
+                .addComponent(jLayeredPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1207, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -854,7 +1371,6 @@ public class Menu extends javax.swing.JFrame {
         resetAllButtonColors();
         setButtonColor(this.ProdutosButton);
         populateProdutos();
-        this.jTextProdutos.setText("");
     }//GEN-LAST:event_ProdutosButtonMouseClicked
 
     private void EncomendasButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EncomendasButtonMouseClicked
@@ -891,7 +1407,6 @@ public class Menu extends javax.swing.JFrame {
         resetAllButtonColors();
         setButtonColor(this.ProdutosButton);
         populateProdutos();
-        this.jTextProdutos.setText("");
     }//GEN-LAST:event_ProdutosButtonLabelMouseClicked
 
     private void EncomendasButtonLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EncomendasButtonLabelMouseClicked
@@ -1017,8 +1532,90 @@ public class Menu extends javax.swing.JFrame {
         // TODO add your handling code here:
         String nome = this.jTableProdutos.getValueAt(this.jTableProdutos.getSelectedRow(), 0).toString();
         Stockproduto temp = this.mc.findStockProdutoNome(nome);
-        this.jTextProdutos.setText(temp.toString());
+        mostrarInfoStockProduto(temp);
     }//GEN-LAST:event_jTableProdutosMouseClicked
+
+    private void precoSemIvaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_precoSemIvaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_precoSemIvaActionPerformed
+
+    private void produtoNomeFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_produtoNomeFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_produtoNomeFieldActionPerformed
+
+    private void TaxaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TaxaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_TaxaActionPerformed
+
+    private void precoComIvaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_precoComIvaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_precoComIvaActionPerformed
+
+    private void TaxaMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TaxaMouseExited
+        // TODO add your handling code here:
+        double preco = Double.parseDouble(this.precoSemIva.getText());
+        double taxa = Double.parseDouble(this.Taxa.getText());
+        
+        this.precoComIva.setText(String.valueOf( preco + preco*taxa ));
+    }//GEN-LAST:event_TaxaMouseExited
+
+    private void ApagarStockProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ApagarStockProdutoActionPerformed
+ 
+    }//GEN-LAST:event_ApagarStockProdutoActionPerformed
+
+    private void GuardarStockProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GuardarStockProdutoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_GuardarStockProdutoActionPerformed
+
+    private void DescricaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DescricaoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_DescricaoActionPerformed
+
+    private void valorTotalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_valorTotalActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_valorTotalActionPerformed
+
+    private void ApagarEncomendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ApagarEncomendaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_ApagarEncomendaActionPerformed
+
+    private void GuardarEncomendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GuardarEncomendaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_GuardarEncomendaActionPerformed
+
+    private void Descricao1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Descricao1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_Descricao1ActionPerformed
+
+    private void nomeFornecedorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nomeFornecedorActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_nomeFornecedorActionPerformed
+
+    private void dataHora1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dataHora1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_dataHora1ActionPerformed
+
+    private void jTableEncomendasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableEncomendasMouseClicked
+        // TODO add your handling code here:
+        int id = Integer.parseInt(this.jTableEncomendas.getValueAt(this.jTableEncomendas.getSelectedRow(), 0).toString());
+        
+        Encomenda temp = this.mc.findEncomendaId(id);
+        mostrarInfoEncomenda(temp);
+    }//GEN-LAST:event_jTableEncomendasMouseClicked
+
+    private void VoltarDeReservasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VoltarDeReservasActionPerformed
+        // TODO add your handling code here:
+        SwitchPanel(1);
+        setButtonColor(this.MesasButton);
+    }//GEN-LAST:event_VoltarDeReservasActionPerformed
+
+    private void GuardarStockProduto1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GuardarStockProduto1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_GuardarStockProduto1ActionPerformed
+
+    private void RecusarReservaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RecusarReservaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_RecusarReservaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1056,27 +1653,53 @@ public class Menu extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton ApagarEncomenda;
+    private javax.swing.JButton ApagarStockProduto;
     private javax.swing.JScrollPane Bebida;
     private javax.swing.JScrollPane Comida;
     private javax.swing.JLabel Desconectar;
     private javax.swing.JPanel DesconectarButton;
+    private javax.swing.JTextField Descricao;
+    private javax.swing.JTextField Descricao1;
     private javax.swing.JLabel Empresa;
     private javax.swing.JPanel EncomendasButton;
     private javax.swing.JLabel EncomendasButtonLabel;
     private javax.swing.JScrollPane Entradas;
+    private javax.swing.JButton GuardarEncomenda;
+    private javax.swing.JButton GuardarStockProduto;
+    private javax.swing.JButton GuardarStockProduto1;
     private javax.swing.JPanel MesasButton;
     private javax.swing.JLabel MesasButtonLabel;
     private javax.swing.JPanel PedidosButton;
     private javax.swing.JLabel PedidosButtonLabel;
     private javax.swing.JPanel ProdutosButton;
     private javax.swing.JLabel ProdutosButtonLabel;
+    private javax.swing.JButton RecusarReserva;
+    private javax.swing.JPanel Reservas;
+    private javax.swing.JTable ReservasAceites;
+    private javax.swing.JTable ReservasPorAceitar;
     private javax.swing.JScrollPane Sobremesa;
+    private javax.swing.JTextField Taxa;
     private javax.swing.JLabel Username;
+    private javax.swing.JButton VoltarDeReservas;
+    private javax.swing.JTextField dataHora1;
     private javax.swing.JPanel defaultpanel;
+    private javax.swing.JComboBox<String> estadoComboBox;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JLayeredPane jLayeredPane1;
     private javax.swing.JList<String> jList1;
     private javax.swing.JList<String> jList2;
@@ -1091,26 +1714,32 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel25;
     private javax.swing.JPanel jPanel26;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel52;
     private javax.swing.JPanel jPanel53;
     private javax.swing.JPanel jPanel55;
     private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane10;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JScrollPane jScrollPane8;
+    private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JSpinner jSpinner1;
+    private javax.swing.JSpinner jSpinner2;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable jTableEncomendas;
     private javax.swing.JTable jTableProdutos;
-    private javax.swing.JTextArea jTextArea5;
     private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField jTextField5;
-    private javax.swing.JTextArea jTextProdutos;
     private javax.swing.JPanel mesas;
+    private javax.swing.JTextField nomeFornecedor;
+    private javax.swing.JTextField precoComIva;
+    private javax.swing.JTextField precoSemIva;
+    private javax.swing.JTextField produtoNomeField;
+    private javax.swing.JTextField valorTotal;
     private javax.swing.JPanel verEncomendas;
     private javax.swing.JPanel verMesas;
     private javax.swing.JPanel verPedidos;
