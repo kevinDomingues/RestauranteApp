@@ -604,18 +604,16 @@ public class Login extends javax.swing.JFrame {
         
         //Retirar os comentários em baixo caso seja necessário utilizar uma conta teste 
         
-//        Entidade teste = new Entidade();
-//        teste.setNome("Entidade teste");
-//        Empresa temp = new Empresa(1, "Restaurante teste LDA", 1234);
-//        teste.setIdEmpresa(temp);
-//        new Menu(teste).setVisible(true);
+    //   Entidade teste = new Entidade();
+      // teste.setNome("Entidade teste");
+       //Empresa temp = new Empresa(1, "Restaurante teste LDA", 1234);
+  
+       //teste.setIdEmpresa(temp);
+       //new Menu(teste).setVisible(true);
         
         String username = this.jUsernameField.getText();
         String password = this.jPasswordField.getText();
 
-        username = "kevind";
-        password = "1234";
-        
         if(lc.validateLogin(username, password)) this.dispose();
     }//GEN-LAST:event_LoginButtonActionPerformed
 

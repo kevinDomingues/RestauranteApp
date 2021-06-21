@@ -26,6 +26,7 @@ import restauranteapp.BLL.MenuJpaController;
 import restauranteapp.DAL.Encomenda;
 import restauranteapp.DAL.Entidade;
 import restauranteapp.DAL.Estado;
+import restauranteapp.DAL.Linhapedido;
 import restauranteapp.DAL.Mesas;
 import restauranteapp.DAL.Pedido;
 import restauranteapp.DAL.Produtoementa;
@@ -102,6 +103,8 @@ public class Menu extends javax.swing.JFrame {
         List<Pedido> pedidos = mc.getPedidos();
         
         for(Pedido e: pedidos){
+            
+            
             java.awt.Color cor = new Color(255, 255, 255);
             if(e.getIdEstado().getIdEstado()==2){ // Pendente
                 cor = new Color(255,235,44);
@@ -139,15 +142,52 @@ public class Menu extends javax.swing.JFrame {
                 backgroundPanel.add(jpPedido);
                 backgroundPanel.add(jlPedidoInfo);
                 jpMain.add(backgroundPanel);
+ 
+                int CodPedido = Integer.parseInt(e.getCodpedido().toString());
+                
+                jpMain.addMouseListener(new java.awt.event.MouseAdapter() {
+                    public void mouseClicked(java.awt.event.MouseEvent evt) {
+                        PedidosButtonMouseClicked(evt, CodPedido);
+                    }
+                    public void mouseEntered(java.awt.event.MouseEvent evt) {}
+                    public void mouseExited(java.awt.event.MouseEvent evt) {}
+                });
+                jpMain.add(backgroundPanel);
                 
                 verPedidos.add(jpMain);
-                
+                 
             }
+           
+            
         }
         verPedidos.validate();
         verPedidos.repaint();
     }
     
+    private void populatePedidosInfo(int CodPedido){
+        DefaultTableModel PedidosInfoTable = (DefaultTableModel) this.PedidosInfoTable.getModel();
+        PedidosInfoTable.setRowCount(0);
+                
+        Pedido temp = this.mc.findPedidoId(CodPedido);
+        
+        List<Linhapedido> linhaPedidos = temp.getLinhapedidoList();
+        
+        
+        for(Linhapedido e : linhaPedidos){
+
+                PedidosInfoTable.insertRow(0, new Object[] {(e.getProdutoementa().getPreco() + e.getProdutoementa().getPreco()*e.getProdutoementa().getTaxa())*e.getQuantidade(), e.getQuantidade(), e.getProdutoementa().getNome()});
+            
+
+        }
+        
+    }
+   
+
+    private void PedidosButtonMouseClicked(java.awt.event.MouseEvent evt, int CodPedido){
+        clearPanels();
+        this.pedidosInfoPanel.setVisible(true);
+    }
+
     private void mostrarMesas(){
         jPanel2.removeAll();
         List<Mesas> mesas = mc.getMesas();
@@ -353,6 +393,9 @@ public class Menu extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jPanel25 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
+        pedidosInfoPanel = new javax.swing.JPanel();
+        jScrollPane8 = new javax.swing.JScrollPane();
+        PedidosInfoTable = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -609,6 +652,14 @@ public class Menu extends javax.swing.JFrame {
             }
         });
         jScrollPane6.setViewportView(ReservasPorAceitar);
+        if (ReservasPorAceitar.getColumnModel().getColumnCount() > 0) {
+            ReservasPorAceitar.getColumnModel().getColumn(0).setHeaderValue("id");
+            ReservasPorAceitar.getColumnModel().getColumn(1).setResizable(false);
+            ReservasPorAceitar.getColumnModel().getColumn(1).setHeaderValue("Cliente");
+            ReservasPorAceitar.getColumnModel().getColumn(2).setHeaderValue("Número Pessoas");
+            ReservasPorAceitar.getColumnModel().getColumn(3).setResizable(false);
+            ReservasPorAceitar.getColumnModel().getColumn(3).setHeaderValue("Data e Hora");
+        }
 
         Reservas.add(jScrollPane6, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, 440, 510));
 
@@ -674,7 +725,6 @@ public class Menu extends javax.swing.JFrame {
 
         precoSemIva.setBackground(new java.awt.Color(240, 240, 240));
         precoSemIva.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        precoSemIva.setForeground(new java.awt.Color(0, 0, 0));
         precoSemIva.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
         precoSemIva.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -687,7 +737,6 @@ public class Menu extends javax.swing.JFrame {
 
         produtoNomeField.setBackground(new java.awt.Color(240, 240, 240));
         produtoNomeField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        produtoNomeField.setForeground(new java.awt.Color(0, 0, 0));
         produtoNomeField.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
         produtoNomeField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -701,7 +750,6 @@ public class Menu extends javax.swing.JFrame {
 
         Taxa.setBackground(new java.awt.Color(240, 240, 240));
         Taxa.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        Taxa.setForeground(new java.awt.Color(0, 0, 0));
         Taxa.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
         Taxa.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseExited(java.awt.event.MouseEvent evt) {
@@ -719,7 +767,6 @@ public class Menu extends javax.swing.JFrame {
 
         precoComIva.setBackground(new java.awt.Color(240, 240, 240));
         precoComIva.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        precoComIva.setForeground(new java.awt.Color(0, 0, 0));
         precoComIva.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
         precoComIva.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -755,7 +802,6 @@ public class Menu extends javax.swing.JFrame {
 
         Descricao.setBackground(new java.awt.Color(240, 240, 240));
         Descricao.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        Descricao.setForeground(new java.awt.Color(0, 0, 0));
         Descricao.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
         Descricao.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -915,7 +961,6 @@ public class Menu extends javax.swing.JFrame {
 
         valorTotal.setBackground(new java.awt.Color(240, 240, 240));
         valorTotal.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        valorTotal.setForeground(new java.awt.Color(0, 0, 0));
         valorTotal.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
         valorTotal.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -928,7 +973,6 @@ public class Menu extends javax.swing.JFrame {
 
         nomeFornecedor.setBackground(new java.awt.Color(240, 240, 240));
         nomeFornecedor.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        nomeFornecedor.setForeground(new java.awt.Color(0, 0, 0));
         nomeFornecedor.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
         nomeFornecedor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -964,7 +1008,6 @@ public class Menu extends javax.swing.JFrame {
 
         Descricao1.setBackground(new java.awt.Color(240, 240, 240));
         Descricao1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        Descricao1.setForeground(new java.awt.Color(0, 0, 0));
         Descricao1.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
         Descricao1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -978,7 +1021,6 @@ public class Menu extends javax.swing.JFrame {
 
         dataHora1.setBackground(new java.awt.Color(240, 240, 240));
         dataHora1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        dataHora1.setForeground(new java.awt.Color(0, 0, 0));
         dataHora1.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
         dataHora1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1175,7 +1217,6 @@ public class Menu extends javax.swing.JFrame {
         jScrollPane3.setViewportView(jListProdutosAdicionar);
 
         jLabel5.setBackground(new java.awt.Color(0, 0, 0));
-        jLabel5.setForeground(new java.awt.Color(0, 0, 0));
         jLabel5.setText("Quantidade:");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -1232,7 +1273,6 @@ public class Menu extends javax.swing.JFrame {
         jPanel24.setBackground(new java.awt.Color(255, 255, 255));
 
         jLabel1.setBackground(new java.awt.Color(0, 0, 0));
-        jLabel1.setForeground(new java.awt.Color(0, 0, 0));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Adicionar");
 
@@ -1252,7 +1292,6 @@ public class Menu extends javax.swing.JFrame {
         jPanel25.setBackground(new java.awt.Color(255, 255, 255));
 
         jLabel4.setBackground(new java.awt.Color(0, 0, 0));
-        jLabel4.setForeground(new java.awt.Color(0, 0, 0));
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel4.setText("Remover");
 
@@ -1269,6 +1308,41 @@ public class Menu extends javax.swing.JFrame {
 
         mesas.add(jPanel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 500, -1, -1));
 
+        pedidosInfoPanel.setBackground(new java.awt.Color(153, 204, 255));
+        pedidosInfoPanel.setMinimumSize(new java.awt.Dimension(1093, 645));
+        pedidosInfoPanel.setPreferredSize(new java.awt.Dimension(1093, 645));
+        pedidosInfoPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        PedidosInfoTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "ValorTotal", "Quantidade", "NomeProduto"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Float.class, java.lang.Integer.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane8.setViewportView(PedidosInfoTable);
+
+        pedidosInfoPanel.add(jScrollPane8, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, 440, 510));
+
         jLayeredPane1.setLayer(Reservas, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane1.setLayer(defaultpanel, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane1.setLayer(verProdutos, javax.swing.JLayeredPane.DEFAULT_LAYER);
@@ -1276,6 +1350,7 @@ public class Menu extends javax.swing.JFrame {
         jLayeredPane1.setLayer(verPedidos, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane1.setLayer(verEncomendas, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane1.setLayer(mesas, javax.swing.JLayeredPane.DEFAULT_LAYER);
+        jLayeredPane1.setLayer(pedidosInfoPanel, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         javax.swing.GroupLayout jLayeredPane1Layout = new javax.swing.GroupLayout(jLayeredPane1);
         jLayeredPane1.setLayout(jLayeredPane1Layout);
@@ -1303,6 +1378,11 @@ public class Menu extends javax.swing.JFrame {
                     .addContainerGap()
                     .addComponent(Reservas, javax.swing.GroupLayout.PREFERRED_SIZE, 1230, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addContainerGap(23, Short.MAX_VALUE)))
+            .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jLayeredPane1Layout.createSequentialGroup()
+                    .addContainerGap(20, Short.MAX_VALUE)
+                    .addComponent(pedidosInfoPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 1230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(9, 9, 9)))
         );
         jLayeredPane1Layout.setVerticalGroup(
             jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1328,6 +1408,11 @@ public class Menu extends javax.swing.JFrame {
                     .addContainerGap(15, Short.MAX_VALUE)
                     .addComponent(Reservas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addContainerGap(16, Short.MAX_VALUE)))
+            .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jLayeredPane1Layout.createSequentialGroup()
+                    .addContainerGap(28, Short.MAX_VALUE)
+                    .addComponent(pedidosInfoPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(8, 8, 8)))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -1672,6 +1757,7 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JLabel MesasButtonLabel;
     private javax.swing.JPanel PedidosButton;
     private javax.swing.JLabel PedidosButtonLabel;
+    private javax.swing.JTable PedidosInfoTable;
     private javax.swing.JPanel ProdutosButton;
     private javax.swing.JLabel ProdutosButtonLabel;
     private javax.swing.JButton RecusarReserva;
@@ -1727,6 +1813,7 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
+    private javax.swing.JScrollPane jScrollPane8;
     private javax.swing.JSpinner jSpinner1;
     private javax.swing.JSpinner jSpinner2;
     private javax.swing.JTabbedPane jTabbedPane1;
@@ -1736,6 +1823,7 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField5;
     private javax.swing.JPanel mesas;
     private javax.swing.JTextField nomeFornecedor;
+    private javax.swing.JPanel pedidosInfoPanel;
     private javax.swing.JTextField precoComIva;
     private javax.swing.JTextField precoSemIva;
     private javax.swing.JTextField produtoNomeField;
