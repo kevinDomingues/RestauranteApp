@@ -34,7 +34,6 @@ public class Login extends javax.swing.JFrame {
     public Login() {
         this.em = Persistence.createEntityManagerFactory("RestauranteAppPU");
         this.lc = new LoginJpaController();
-      //  this.setUndecorated(true);
         initComponents();        
         this.setLocationRelativeTo(null);
         SwitchPanel(1);
@@ -601,19 +600,10 @@ public class Login extends javax.swing.JFrame {
 
     private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
         // TODO add your handling code here:
-        
-        //Retirar os comentários em baixo caso seja necessário utilizar uma conta teste 
-        
-    //   Entidade teste = new Entidade();
-      // teste.setNome("Entidade teste");
-       //Empresa temp = new Empresa(1, "Restaurante teste LDA", 1234);
-  
-       //teste.setIdEmpresa(temp);
-       //new Menu(teste).setVisible(true);
-        
         String username = this.jUsernameField.getText();
         String password = this.jPasswordField.getText();
 
+      //  username="kevind"; password="1234";
         if(lc.validateLogin(username, password)) this.dispose();
     }//GEN-LAST:event_LoginButtonActionPerformed
 

@@ -15,7 +15,11 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseListener;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -26,6 +30,9 @@ import restauranteapp.BLL.MenuJpaController;
 import restauranteapp.DAL.Encomenda;
 import restauranteapp.DAL.Entidade;
 import restauranteapp.DAL.Estado;
+import restauranteapp.DAL.Fornecedor;
+import restauranteapp.DAL.Linhaencomenda;
+import restauranteapp.DAL.LinhaencomendaPK;
 import restauranteapp.DAL.Linhapedido;
 import restauranteapp.DAL.Mesas;
 import restauranteapp.DAL.Pedido;
@@ -41,20 +48,24 @@ public class Menu extends javax.swing.JFrame {
 
     private Entidade temp;
     private MenuJpaController mc;
+    private int PedidoCurrente;
+    private int MesaCurrente;
+    private Encomenda novaEncomenda;
+    private List<Linhaencomenda> linhaencomenda;
+    
+    
     /**
      * Creates new form Menu
      */
     public Menu(Entidade temp) {
         this.temp = temp;
         this.mc = new MenuJpaController();
-       // this.setUndecorated(true);
         initComponents();
         setLocationRelativeTo(null);
         SwitchPanel(6);
         this.Username.setText(temp.getNome());
         this.Empresa.setText(temp.getIdEmpresa().getNome());
         populateEstados();
-        this.Reservas.setVisible(true);
     }
 
     public void setButtonColor(javax.swing.JPanel panel){
@@ -84,6 +95,8 @@ public class Menu extends javax.swing.JFrame {
         this.mesas.setVisible(false);
         this.defaultpanel.setVisible(false);
         this.Reservas.setVisible(false);
+        this.pedidosInfoPanel.setVisible(false);
+        this.realizarEncomenda.setVisible(false);
     }
     
     public void SwitchPanel(int panelNumber) {
@@ -147,7 +160,7 @@ public class Menu extends javax.swing.JFrame {
                 
                 jpMain.addMouseListener(new java.awt.event.MouseAdapter() {
                     public void mouseClicked(java.awt.event.MouseEvent evt) {
-                        PedidosButtonMouseClicked(evt, CodPedido);
+                        PedidosInfoButtonMouseClicked(evt, CodPedido);
                     }
                     public void mouseEntered(java.awt.event.MouseEvent evt) {}
                     public void mouseExited(java.awt.event.MouseEvent evt) {}
@@ -165,27 +178,39 @@ public class Menu extends javax.swing.JFrame {
     }
     
     private void populatePedidosInfo(int CodPedido){
+        this.EntregarPedidoButton.setVisible(false);
+        this.PedidoCurrente = CodPedido;
+        
         DefaultTableModel PedidosInfoTable = (DefaultTableModel) this.PedidosInfoTable.getModel();
         PedidosInfoTable.setRowCount(0);
                 
         Pedido temp = this.mc.findPedidoId(CodPedido);
+        if(temp.getIdEstado().getIdEstado()==3) {this.EntregarPedidoButton.setVisible(true);}
         
         List<Linhapedido> linhaPedidos = temp.getLinhapedidoList();
-        
+        System.out.println(linhaPedidos.size());
+        double valorTotal = 0;
         
         for(Linhapedido e : linhaPedidos){
-
-                PedidosInfoTable.insertRow(0, new Object[] {(e.getProdutoementa().getPreco() + e.getProdutoementa().getPreco()*e.getProdutoementa().getTaxa())*e.getQuantidade(), e.getQuantidade(), e.getProdutoementa().getNome()});
+                double precoProdutoComIva = e.getProdutoementa().getPreco() + e.getProdutoementa().getPreco()*e.getProdutoementa().getTaxa();
+                double valorLinha = precoProdutoComIva*e.getQuantidade();
             
-
+                PedidosInfoTable.insertRow(0, new Object[] { e.getProdutoementa().getNome(), precoProdutoComIva, e.getQuantidade(), valorLinha });
+                
+                valorTotal += valorLinha;
         }
+         
+        BigDecimal big = new BigDecimal(valorTotal).setScale(2, RoundingMode.HALF_DOWN);
+        valorTotal = big.doubleValue();
         
+        this.valorTotalPedido.setText(String.valueOf(valorTotal));
     }
    
 
-    private void PedidosButtonMouseClicked(java.awt.event.MouseEvent evt, int CodPedido){
+    private void PedidosInfoButtonMouseClicked(java.awt.event.MouseEvent evt, int CodPedido){
         clearPanels();
         this.pedidosInfoPanel.setVisible(true);
+        populatePedidosInfo(CodPedido);
     }
 
     private void mostrarMesas(){
@@ -245,6 +270,8 @@ public class Menu extends javax.swing.JFrame {
     }
     
     private void populateReservas(int idMesa){
+        this.MesaCurrente = idMesa;
+        
         DefaultTableModel reservasPorAceitar = (DefaultTableModel) this.ReservasPorAceitar.getModel();
         DefaultTableModel reservasAceites = (DefaultTableModel) this.ReservasAceites.getModel();
         reservasPorAceitar.setRowCount(0);
@@ -262,6 +289,22 @@ public class Menu extends javax.swing.JFrame {
             }
         }
         
+    }
+    
+    private void populateRealizarEncomendaFields() {
+        List<Fornecedor> fornecedores = this.mc.getFornecedores();
+        List<Stockproduto> produtos = this.mc.getStockProdutos();
+        
+        DefaultTableModel tableProdutos = (DefaultTableModel) this.jTableEncomendaProdutos.getModel();
+        tableProdutos.setRowCount(0);
+        
+        for(Fornecedor e : fornecedores){
+            this.FornecedorComboBox.addItem(e.getNome());
+        }
+        
+        for(Stockproduto e : produtos){            
+            tableProdutos.insertRow(0, new Object[] { e.getIdStockproduto(), e.getNome(), e.getPreco(), e.getTaxa() });
+        }
     }
     
     private void populateProdutos(){
@@ -292,6 +335,26 @@ public class Menu extends javax.swing.JFrame {
         for(Estado e : estados){
             this.estadoComboBox.addItem(e.getEstado());
         }
+    }
+    
+    private void populateLinhas(){
+        DefaultTableModel tableLinhasEncomenda = (DefaultTableModel) this.jTableEncomendaProdutosAdicionados.getModel();
+        tableLinhasEncomenda.setRowCount(0);
+ 
+        double valorTotal = 0;
+        
+        for(Linhaencomenda e : this.linhaencomenda){
+            double precoProduto = e.getStockproduto().getPreco() + e.getStockproduto().getPreco()*e.getStockproduto().getTaxa();
+            
+            valorTotal += precoProduto*e.getQuantidade();
+            
+            tableLinhasEncomenda.insertRow(0, new Object[] { e.getStockproduto().getIdStockproduto() ,e.getStockproduto().getNome(), e.getQuantidade() });
+        }  
+        
+        BigDecimal big = new BigDecimal(valorTotal).setScale(2, RoundingMode.HALF_DOWN);
+        valorTotal = big.doubleValue();
+        
+        this.valorTotalEncomenda.setText(String.valueOf(valorTotal));
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -325,7 +388,7 @@ public class Menu extends javax.swing.JFrame {
         ReservasPorAceitar = new javax.swing.JTable();
         jScrollPane7 = new javax.swing.JScrollPane();
         ReservasAceites = new javax.swing.JTable();
-        GuardarStockProduto1 = new javax.swing.JButton();
+        AceitarReserva = new javax.swing.JButton();
         RecusarReserva = new javax.swing.JButton();
         defaultpanel = new javax.swing.JPanel();
         verProdutos = new javax.swing.JPanel();
@@ -371,6 +434,7 @@ public class Menu extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTableEncomendas = new javax.swing.JTable();
         jPanel6 = new RoundedPanel(50, new Color(85, 167, 219));
+        RealizarEncomenda = new javax.swing.JButton();
         mesas = new javax.swing.JPanel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         Entradas = new javax.swing.JScrollPane();
@@ -396,6 +460,31 @@ public class Menu extends javax.swing.JFrame {
         pedidosInfoPanel = new javax.swing.JPanel();
         jScrollPane8 = new javax.swing.JScrollPane();
         PedidosInfoTable = new javax.swing.JTable();
+        VoltarDePedidoInfo = new javax.swing.JButton();
+        valorTotalPedido = new javax.swing.JLabel();
+        jLabel15 = new javax.swing.JLabel();
+        EntregarPedidoButton = new javax.swing.JButton();
+        realizarEncomenda = new javax.swing.JPanel();
+        VoltarDeRealizarEncomenda = new javax.swing.JButton();
+        jPanel8 = new javax.swing.JPanel();
+        jLabel19 = new javax.swing.JLabel();
+        jLabel20 = new javax.swing.JLabel();
+        DescricaoEncomenda = new javax.swing.JTextField();
+        FornecedorComboBox = new javax.swing.JComboBox<>();
+        removerProdutoEncomenda = new javax.swing.JButton();
+        jScrollPane10 = new javax.swing.JScrollPane();
+        jTableEncomendaProdutosAdicionados = new javax.swing.JTable();
+        jLabel21 = new javax.swing.JLabel();
+        valorTotalEncomenda = new javax.swing.JLabel();
+        CreateEncomenda = new javax.swing.JButton();
+        jPanel9 = new RoundedPanel(50, new Color(85, 167, 219));
+        QuantidadeProdutoEncomenda = new javax.swing.JSpinner();
+        AdicionarProdutoEncomenda = new javax.swing.JButton();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        jTableEncomendaProdutos = new javax.swing.JTable();
+        erroQuantidade = new javax.swing.JLabel();
+        jScrollPane9 = new javax.swing.JScrollPane();
+        jTableEncomendas2 = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -630,7 +719,7 @@ public class Menu extends javax.swing.JFrame {
                 VoltarDeReservasActionPerformed(evt);
             }
         });
-        Reservas.add(VoltarDeReservas, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 17, -1, -1));
+        Reservas.add(VoltarDeReservas, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 20, -1, -1));
 
         ReservasPorAceitar.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -646,19 +735,23 @@ public class Menu extends javax.swing.JFrame {
             Class[] types = new Class [] {
                 java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class
             };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
             }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
         });
         jScrollPane6.setViewportView(ReservasPorAceitar);
         if (ReservasPorAceitar.getColumnModel().getColumnCount() > 0) {
-            ReservasPorAceitar.getColumnModel().getColumn(0).setHeaderValue("id");
+            ReservasPorAceitar.getColumnModel().getColumn(0).setMaxWidth(50);
             ReservasPorAceitar.getColumnModel().getColumn(1).setResizable(false);
-            ReservasPorAceitar.getColumnModel().getColumn(1).setHeaderValue("Cliente");
-            ReservasPorAceitar.getColumnModel().getColumn(2).setHeaderValue("Número Pessoas");
             ReservasPorAceitar.getColumnModel().getColumn(3).setResizable(false);
-            ReservasPorAceitar.getColumnModel().getColumn(3).setHeaderValue("Data e Hora");
         }
 
         Reservas.add(jScrollPane6, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, 440, 510));
@@ -677,26 +770,36 @@ public class Menu extends javax.swing.JFrame {
             Class[] types = new Class [] {
                 java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class
             };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
             }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
         });
         jScrollPane7.setViewportView(ReservasAceites);
+        if (ReservasAceites.getColumnModel().getColumnCount() > 0) {
+            ReservasAceites.getColumnModel().getColumn(0).setMaxWidth(50);
+        }
 
         Reservas.add(jScrollPane7, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 80, 440, 510));
 
-        GuardarStockProduto1.setBackground(new java.awt.Color(228, 255, 201));
-        GuardarStockProduto1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        GuardarStockProduto1.setForeground(new java.awt.Color(102, 102, 102));
-        GuardarStockProduto1.setText("Aceitar");
-        GuardarStockProduto1.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
-        GuardarStockProduto1.addActionListener(new java.awt.event.ActionListener() {
+        AceitarReserva.setBackground(new java.awt.Color(228, 255, 201));
+        AceitarReserva.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        AceitarReserva.setForeground(new java.awt.Color(102, 102, 102));
+        AceitarReserva.setText("Aceitar");
+        AceitarReserva.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        AceitarReserva.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                GuardarStockProduto1ActionPerformed(evt);
+                AceitarReservaActionPerformed(evt);
             }
         });
-        Reservas.add(GuardarStockProduto1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 240, 142, 42));
+        Reservas.add(AceitarReserva, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 240, 142, 42));
 
         RecusarReserva.setBackground(new java.awt.Color(255, 202, 193));
         RecusarReserva.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
@@ -1148,19 +1251,36 @@ public class Menu extends javax.swing.JFrame {
             jTableEncomendas.getColumnModel().getColumn(0).setMaxWidth(35);
         }
 
-        verEncomendas.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 150, 250, 420));
+        verEncomendas.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 150, 250, 380));
 
         jPanel6.setBackground(new java.awt.Color(87, 167, 219));
+
+        RealizarEncomenda.setBackground(new java.awt.Color(255, 255, 255));
+        RealizarEncomenda.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        RealizarEncomenda.setForeground(new java.awt.Color(102, 102, 102));
+        RealizarEncomenda.setText("Realizar Encomenda");
+        RealizarEncomenda.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        RealizarEncomenda.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                RealizarEncomendaActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 960, Short.MAX_VALUE)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(30, 30, 30)
+                .addComponent(RealizarEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(679, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 530, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                .addContainerGap(461, Short.MAX_VALUE)
+                .addComponent(RealizarEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(30, 30, 30))
         );
 
         verEncomendas.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 70, 960, 530));
@@ -1308,12 +1428,120 @@ public class Menu extends javax.swing.JFrame {
 
         mesas.add(jPanel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 500, -1, -1));
 
-        pedidosInfoPanel.setBackground(new java.awt.Color(153, 204, 255));
         pedidosInfoPanel.setMinimumSize(new java.awt.Dimension(1093, 645));
         pedidosInfoPanel.setPreferredSize(new java.awt.Dimension(1093, 645));
         pedidosInfoPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         PedidosInfoTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "NomeProduto", "Valor", "Quantidade", "ValorTotal"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.Float.class, java.lang.Integer.class, java.lang.Float.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane8.setViewportView(PedidosInfoTable);
+        if (PedidosInfoTable.getColumnModel().getColumnCount() > 0) {
+            PedidosInfoTable.getColumnModel().getColumn(1).setMaxWidth(125);
+            PedidosInfoTable.getColumnModel().getColumn(2).setMaxWidth(125);
+            PedidosInfoTable.getColumnModel().getColumn(3).setMaxWidth(125);
+        }
+
+        pedidosInfoPanel.add(jScrollPane8, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 80, 830, 450));
+
+        VoltarDePedidoInfo.setText("Voltar");
+        VoltarDePedidoInfo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                VoltarDePedidoInfoActionPerformed(evt);
+            }
+        });
+        pedidosInfoPanel.add(VoltarDePedidoInfo, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 30, -1, -1));
+
+        valorTotalPedido.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        valorTotalPedido.setText("Valor Pedido:");
+        pedidosInfoPanel.add(valorTotalPedido, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 550, 120, -1));
+
+        jLabel15.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel15.setText("Valor Pedido:");
+        pedidosInfoPanel.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 550, 120, -1));
+
+        EntregarPedidoButton.setBackground(new java.awt.Color(228, 255, 201));
+        EntregarPedidoButton.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        EntregarPedidoButton.setForeground(new java.awt.Color(102, 102, 102));
+        EntregarPedidoButton.setText("Entregue");
+        EntregarPedidoButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        EntregarPedidoButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                EntregarPedidoButtonActionPerformed(evt);
+            }
+        });
+        pedidosInfoPanel.add(EntregarPedidoButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(840, 540, 142, 42));
+
+        realizarEncomenda.setMinimumSize(new java.awt.Dimension(1093, 645));
+        realizarEncomenda.setPreferredSize(new java.awt.Dimension(1093, 645));
+        realizarEncomenda.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        VoltarDeRealizarEncomenda.setText("Voltar");
+        VoltarDeRealizarEncomenda.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                VoltarDeRealizarEncomendaActionPerformed(evt);
+            }
+        });
+        realizarEncomenda.add(VoltarDeRealizarEncomenda, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 40, -1, -1));
+
+        jPanel8.setBackground(new java.awt.Color(255, 255, 255));
+
+        jLabel19.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel19.setText("Fornecedor");
+
+        jLabel20.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel20.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel20.setText("Descrição");
+
+        DescricaoEncomenda.setBackground(new java.awt.Color(240, 240, 240));
+        DescricaoEncomenda.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        DescricaoEncomenda.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        DescricaoEncomenda.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DescricaoEncomendaActionPerformed(evt);
+            }
+        });
+
+        FornecedorComboBox.setBackground(new java.awt.Color(240, 240, 240));
+        FornecedorComboBox.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        FornecedorComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] {}));
+        FornecedorComboBox.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+
+        removerProdutoEncomenda.setBackground(new java.awt.Color(255, 202, 193));
+        removerProdutoEncomenda.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        removerProdutoEncomenda.setForeground(new java.awt.Color(102, 102, 102));
+        removerProdutoEncomenda.setText("Remover Produto");
+        removerProdutoEncomenda.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        removerProdutoEncomenda.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removerProdutoEncomendaActionPerformed(evt);
+            }
+        });
+
+        jTableEncomendaProdutosAdicionados.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null},
                 {null, null, null},
@@ -1321,11 +1549,11 @@ public class Menu extends javax.swing.JFrame {
                 {null, null, null}
             },
             new String [] {
-                "ValorTotal", "Quantidade", "NomeProduto"
+                "id", "Nome", "Quantidade"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Float.class, java.lang.Integer.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false
@@ -1339,9 +1567,210 @@ public class Menu extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane8.setViewportView(PedidosInfoTable);
+        jTableEncomendaProdutosAdicionados.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableEncomendaProdutosAdicionadosMouseClicked(evt);
+            }
+        });
+        jScrollPane10.setViewportView(jTableEncomendaProdutosAdicionados);
+        if (jTableEncomendaProdutosAdicionados.getColumnModel().getColumnCount() > 0) {
+            jTableEncomendaProdutosAdicionados.getColumnModel().getColumn(0).setMaxWidth(35);
+        }
 
-        pedidosInfoPanel.add(jScrollPane8, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, 440, 510));
+        jLabel21.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel21.setText("Valor Pedido:");
+
+        valorTotalEncomenda.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        valorTotalEncomenda.setText("0");
+
+        CreateEncomenda.setBackground(new java.awt.Color(228, 255, 201));
+        CreateEncomenda.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        CreateEncomenda.setForeground(new java.awt.Color(102, 102, 102));
+        CreateEncomenda.setText("Realizar Encomenda");
+        CreateEncomenda.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        CreateEncomenda.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CreateEncomendaActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        jPanel8.setLayout(jPanel8Layout);
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addGap(0, 70, Short.MAX_VALUE)
+                        .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
+                                .addComponent(jLabel19)
+                                .addGap(203, 203, 203))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
+                                .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(126, 126, 126))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
+                                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(DescricaoEncomenda, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(FornecedorComboBox, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jScrollPane10, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(69, 69, 69))))
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(valorTotalEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(removerProdutoEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(124, 124, 124))
+            .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(CreateEncomenda, javax.swing.GroupLayout.DEFAULT_SIZE, 510, Short.MAX_VALUE))
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel21)
+                    .addComponent(valorTotalEncomenda))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel19)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(FornecedorComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel20)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(DescricaoEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane10, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(removerProdutoEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(62, Short.MAX_VALUE))
+            .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
+                    .addGap(0, 423, Short.MAX_VALUE)
+                    .addComponent(CreateEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
+        );
+
+        realizarEncomenda.add(jPanel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 110, 510, 460));
+
+        jPanel9.setBackground(new java.awt.Color(87, 167, 219));
+
+        AdicionarProdutoEncomenda.setBackground(new java.awt.Color(255, 255, 255));
+        AdicionarProdutoEncomenda.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        AdicionarProdutoEncomenda.setForeground(new java.awt.Color(102, 102, 102));
+        AdicionarProdutoEncomenda.setText("Adicionar Produto");
+        AdicionarProdutoEncomenda.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        AdicionarProdutoEncomenda.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                AdicionarProdutoEncomendaActionPerformed(evt);
+            }
+        });
+
+        jTableEncomendaProdutos.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "id", "Nome", "Preço", "Taxa"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.Double.class, java.lang.Double.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTableEncomendaProdutos.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableEncomendaProdutosMouseClicked(evt);
+            }
+        });
+        jScrollPane5.setViewportView(jTableEncomendaProdutos);
+        if (jTableEncomendaProdutos.getColumnModel().getColumnCount() > 0) {
+            jTableEncomendaProdutos.getColumnModel().getColumn(0).setMaxWidth(35);
+        }
+
+        erroQuantidade.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        erroQuantidade.setForeground(new java.awt.Color(204, 0, 0));
+        erroQuantidade.setText("A quantidade não deve ser negativa");
+
+        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+        jPanel9.setLayout(jPanel9Layout);
+        jPanel9Layout.setHorizontalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel9Layout.createSequentialGroup()
+                        .addGap(26, 26, 26)
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(AdicionarProdutoEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, 329, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(QuantidadeProdutoEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel9Layout.createSequentialGroup()
+                        .addGap(97, 97, 97)
+                        .addComponent(erroQuantidade)))
+                .addContainerGap(604, Short.MAX_VALUE))
+        );
+        jPanel9Layout.setVerticalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
+                .addContainerGap(37, Short.MAX_VALUE)
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(QuantidadeProdutoEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(AdicionarProdutoEncomenda, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(erroQuantidade)
+                .addGap(8, 8, 8))
+        );
+
+        realizarEncomenda.add(jPanel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 70, 960, 530));
+
+        jTableEncomendas2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "id", "Nome", "Preço", "Taxa"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTableEncomendas2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableEncomendas2MouseClicked(evt);
+            }
+        });
+        jScrollPane9.setViewportView(jTableEncomendas2);
+        if (jTableEncomendas2.getColumnModel().getColumnCount() > 0) {
+            jTableEncomendas2.getColumnModel().getColumn(0).setMaxWidth(35);
+        }
+
+        realizarEncomenda.add(jScrollPane9, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 150, 330, 350));
 
         jLayeredPane1.setLayer(Reservas, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane1.setLayer(defaultpanel, javax.swing.JLayeredPane.DEFAULT_LAYER);
@@ -1351,6 +1780,7 @@ public class Menu extends javax.swing.JFrame {
         jLayeredPane1.setLayer(verEncomendas, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane1.setLayer(mesas, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jLayeredPane1.setLayer(pedidosInfoPanel, javax.swing.JLayeredPane.DEFAULT_LAYER);
+        jLayeredPane1.setLayer(realizarEncomenda, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         javax.swing.GroupLayout jLayeredPane1Layout = new javax.swing.GroupLayout(jLayeredPane1);
         jLayeredPane1.setLayout(jLayeredPane1Layout);
@@ -1383,6 +1813,11 @@ public class Menu extends javax.swing.JFrame {
                     .addContainerGap(20, Short.MAX_VALUE)
                     .addComponent(pedidosInfoPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 1230, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGap(9, 9, 9)))
+            .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jLayeredPane1Layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(realizarEncomenda, javax.swing.GroupLayout.DEFAULT_SIZE, 1259, Short.MAX_VALUE)
+                    .addContainerGap()))
         );
         jLayeredPane1Layout.setVerticalGroup(
             jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1413,6 +1848,11 @@ public class Menu extends javax.swing.JFrame {
                     .addContainerGap(28, Short.MAX_VALUE)
                     .addComponent(pedidosInfoPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGap(8, 8, 8)))
+            .addGroup(jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jLayeredPane1Layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(realizarEncomenda, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addContainerGap()))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -1694,13 +2134,154 @@ public class Menu extends javax.swing.JFrame {
         setButtonColor(this.MesasButton);
     }//GEN-LAST:event_VoltarDeReservasActionPerformed
 
-    private void GuardarStockProduto1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GuardarStockProduto1ActionPerformed
+    private void AceitarReservaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AceitarReservaActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_GuardarStockProduto1ActionPerformed
+        int id = Integer.parseInt(this.ReservasPorAceitar.getValueAt(this.ReservasPorAceitar.getSelectedRow(), 0).toString());
+        System.out.println(id);
+        
+        Reserva temp = this.mc.findReservaId(id);
+        
+        temp.setIdEstado(this.mc.findEstadoId(5));
+        
+        this.mc.updateReserva(temp);
+        populateReservas(this.MesaCurrente);
+    }//GEN-LAST:event_AceitarReservaActionPerformed
 
     private void RecusarReservaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RecusarReservaActionPerformed
         // TODO add your handling code here:
+        int id = Integer.parseInt(this.ReservasPorAceitar.getValueAt(this.ReservasPorAceitar.getSelectedRow(), 0).toString());
+        
+        Reserva temp = this.mc.findReservaId(id);
+        
+        temp.setIdEstado(this.mc.findEstadoId(1));
+        
+        this.mc.updateReserva(temp);
+        populateReservas(this.MesaCurrente);
     }//GEN-LAST:event_RecusarReservaActionPerformed
+
+    private void VoltarDePedidoInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VoltarDePedidoInfoActionPerformed
+        // TODO add your handling code here:
+        SwitchPanel(2);
+    }//GEN-LAST:event_VoltarDePedidoInfoActionPerformed
+
+    private void EntregarPedidoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EntregarPedidoButtonActionPerformed
+        // TODO add your handling code here:
+        Pedido temp = this.mc.findPedidoId(this.PedidoCurrente);
+        
+        temp.setIdEstado(this.mc.findEstadoId(4));
+        
+        this.mc.updatePedido(temp);
+        
+        mostrarPedidos();
+        SwitchPanel(2);
+    }//GEN-LAST:event_EntregarPedidoButtonActionPerformed
+
+    private void RealizarEncomendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RealizarEncomendaActionPerformed
+        // TODO add your handling code here:
+        clearPanels();
+        this.realizarEncomenda.setVisible(true);
+        this.erroQuantidade.setVisible(false);
+        
+        this.novaEncomenda = null;
+        this.linhaencomenda = null;
+        this.novaEncomenda = new Encomenda();
+        this.linhaencomenda = new ArrayList<Linhaencomenda>();
+        
+        populateRealizarEncomendaFields();
+        populateLinhas();
+    }//GEN-LAST:event_RealizarEncomendaActionPerformed
+
+    private void DescricaoEncomendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DescricaoEncomendaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_DescricaoEncomendaActionPerformed
+
+    private void jTableEncomendaProdutosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableEncomendaProdutosMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTableEncomendaProdutosMouseClicked
+
+    private void removerProdutoEncomendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removerProdutoEncomendaActionPerformed
+        // TODO add your handling code here:
+        String nome = this.jTableEncomendaProdutosAdicionados.getValueAt(this.jTableEncomendaProdutosAdicionados.getSelectedRow(), 1).toString();
+        int index = -1;
+        
+        for(int i = 0; i < this.linhaencomenda.size(); i++){
+            if(this.linhaencomenda.get(i).getStockproduto().getNome().equals(nome)){
+                index = i;
+            }    
+        }  
+          
+        if(index!=-1){
+            this.linhaencomenda.remove(index);
+            populateLinhas();
+        }
+    }//GEN-LAST:event_removerProdutoEncomendaActionPerformed
+
+    private void AdicionarProdutoEncomendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AdicionarProdutoEncomendaActionPerformed
+        // TODO add your handling code here:
+        this.erroQuantidade.setVisible(false);
+        int quantidade = Integer.valueOf(this.QuantidadeProdutoEncomenda.getValue().toString());
+        
+        if(quantidade > 0){
+            String nome = this.jTableEncomendaProdutos.getValueAt(this.jTableEncomendaProdutos.getSelectedRow(), 1).toString();
+
+            Stockproduto temp = this.mc.findStockProdutoNome(nome);
+
+            Linhaencomenda linha = new Linhaencomenda();
+            linha.setStockproduto(temp);
+            linha.setQuantidade(quantidade);
+
+            this.linhaencomenda.add(linha);
+
+            populateLinhas();
+        } else {
+            this.erroQuantidade.setVisible(true);
+        }
+    }//GEN-LAST:event_AdicionarProdutoEncomendaActionPerformed
+
+    private void jTableEncomendas2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableEncomendas2MouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTableEncomendas2MouseClicked
+
+    private void jTableEncomendaProdutosAdicionadosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableEncomendaProdutosAdicionadosMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTableEncomendaProdutosAdicionadosMouseClicked
+
+    private void VoltarDeRealizarEncomendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VoltarDeRealizarEncomendaActionPerformed
+        // TODO add your handling code here:
+        SwitchPanel(4);
+    }//GEN-LAST:event_VoltarDeRealizarEncomendaActionPerformed
+
+    private void CreateEncomendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CreateEncomendaActionPerformed
+        // TODO add your handling code here:
+        Date date = new Date();
+        
+        this.novaEncomenda.setDatahora(date);
+        this.novaEncomenda.setIdEstado(this.mc.findEstadoId(2));
+        this.novaEncomenda.setIdFornecedor(this.mc.findFornecedorNome(this.FornecedorComboBox.getSelectedItem().toString().trim()));
+        this.novaEncomenda.setValortotal(Double.parseDouble(this.valorTotalEncomenda.getText()));
+        this.novaEncomenda.setDescricao(this.DescricaoEncomenda.getText());       
+        this.mc.createEncomenda(this.novaEncomenda);
+        
+        int idEncomenda = this.mc.findEncomendaDescricao(this.DescricaoEncomenda.getText()).getIdEncomenda();
+        
+        LinhaencomendaPK lk = new LinhaencomendaPK();
+        
+        for(Linhaencomenda e : this.linhaencomenda){
+            lk.setIdEncomenda(idEncomenda);
+            lk.setIdStockproduto(e.getStockproduto().getIdStockproduto());
+            
+            e.setLinhaencomendaPK(lk);
+            
+            this.mc.createLinhaEncomenda(e);
+        }
+        
+        this.novaEncomenda.setLinhaencomendaList(this.linhaencomenda);
+        
+        this.mc.updateEncomenda(this.novaEncomenda);
+        
+        SwitchPanel(4);
+        populateEncomendas();
+    }//GEN-LAST:event_CreateEncomendaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1738,21 +2319,26 @@ public class Menu extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton AceitarReserva;
+    private javax.swing.JButton AdicionarProdutoEncomenda;
     private javax.swing.JButton ApagarEncomenda;
     private javax.swing.JButton ApagarStockProduto;
     private javax.swing.JScrollPane Bebida;
     private javax.swing.JScrollPane Comida;
+    private javax.swing.JButton CreateEncomenda;
     private javax.swing.JLabel Desconectar;
     private javax.swing.JPanel DesconectarButton;
     private javax.swing.JTextField Descricao;
     private javax.swing.JTextField Descricao1;
+    private javax.swing.JTextField DescricaoEncomenda;
     private javax.swing.JLabel Empresa;
     private javax.swing.JPanel EncomendasButton;
     private javax.swing.JLabel EncomendasButtonLabel;
     private javax.swing.JScrollPane Entradas;
+    private javax.swing.JButton EntregarPedidoButton;
+    private javax.swing.JComboBox<String> FornecedorComboBox;
     private javax.swing.JButton GuardarEncomenda;
     private javax.swing.JButton GuardarStockProduto;
-    private javax.swing.JButton GuardarStockProduto1;
     private javax.swing.JPanel MesasButton;
     private javax.swing.JLabel MesasButtonLabel;
     private javax.swing.JPanel PedidosButton;
@@ -1760,6 +2346,8 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JTable PedidosInfoTable;
     private javax.swing.JPanel ProdutosButton;
     private javax.swing.JLabel ProdutosButtonLabel;
+    private javax.swing.JSpinner QuantidadeProdutoEncomenda;
+    private javax.swing.JButton RealizarEncomenda;
     private javax.swing.JButton RecusarReserva;
     private javax.swing.JPanel Reservas;
     private javax.swing.JTable ReservasAceites;
@@ -1767,18 +2355,25 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JScrollPane Sobremesa;
     private javax.swing.JTextField Taxa;
     private javax.swing.JLabel Username;
+    private javax.swing.JButton VoltarDePedidoInfo;
+    private javax.swing.JButton VoltarDeRealizarEncomenda;
     private javax.swing.JButton VoltarDeReservas;
     private javax.swing.JTextField dataHora1;
     private javax.swing.JPanel defaultpanel;
+    private javax.swing.JLabel erroQuantidade;
     private javax.swing.JComboBox<String> estadoComboBox;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1807,17 +2402,25 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel55;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane10;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JScrollPane jScrollPane8;
+    private javax.swing.JScrollPane jScrollPane9;
     private javax.swing.JSpinner jSpinner1;
     private javax.swing.JSpinner jSpinner2;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTable jTableEncomendaProdutos;
+    private javax.swing.JTable jTableEncomendaProdutosAdicionados;
     private javax.swing.JTable jTableEncomendas;
+    private javax.swing.JTable jTableEncomendas2;
     private javax.swing.JTable jTableProdutos;
     private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField jTextField5;
@@ -1827,7 +2430,11 @@ public class Menu extends javax.swing.JFrame {
     private javax.swing.JTextField precoComIva;
     private javax.swing.JTextField precoSemIva;
     private javax.swing.JTextField produtoNomeField;
+    private javax.swing.JPanel realizarEncomenda;
+    private javax.swing.JButton removerProdutoEncomenda;
     private javax.swing.JTextField valorTotal;
+    private javax.swing.JLabel valorTotalEncomenda;
+    private javax.swing.JLabel valorTotalPedido;
     private javax.swing.JPanel verEncomendas;
     private javax.swing.JPanel verMesas;
     private javax.swing.JPanel verPedidos;
